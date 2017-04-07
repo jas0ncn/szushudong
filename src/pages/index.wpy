@@ -1,0 +1,47 @@
+<template>
+  <view class="container">
+    <text>233</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import store from '../store/index.js'
+
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '深大的树洞'
+  }
+
+  data = {
+  }
+
+  computed = {
+  }
+
+  methods = {
+  }
+
+  events = {
+  }
+
+  onLoad() {
+    console.log(store.state.userinfo) // {}
+
+    store.mutate(state => {
+      state.userinfo = {
+        name: 'Jason'
+      }
+      return state
+    }) // { name: 'Jason' }
+
+    store.mutate(state => {
+      state.userinfo.age = 21
+      return state
+    }) // { name: 'Jason', age: 21 }
+  }
+}
+</script>
+
+<style lang="less">
+</style>
