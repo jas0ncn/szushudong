@@ -1,0 +1,13 @@
+<template>
+  <text>message page</text>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Message extends wepy.component {
+}
+</script>
+
+<style lang="less">
+</style>

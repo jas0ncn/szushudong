@@ -1,47 +1,93 @@
 <template>
   <view class="container">
-    <text>233</text>
+    <list    wx:if="{{ tab === 1 }}"></list>
+    <message wx:if="{{ tab === 2 }}"></message>
+    <user    wx:if="{{ tab === 3 }}"></user>
+  </view>
+  <view class="tabs">
+    <div class="tab" catchtap="switchTapTo('1')">
+      <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 1 }}"></image>
+      <image src="../assets/svgs/home.svg" wx:else></image>
+    </div>
+    <div class="tab" catchtap="switchTapTo('2')">
+      <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 2 }}"></image>
+      <image src="../assets/svgs/message.svg" wx:else></image>
+    </div>
+    <div class="tab" catchtap="switchTapTo('3')">
+      <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 3 }}"></image>
+      <image src="../assets/svgs/my.svg" wx:else></image>
+    </div>
   </view>
 </template>
 
 <script>
 import wepy from 'wepy'
-import store from '../store/index.js'
+
+// tabs
+import list from './list'
+import user from './user'
+import message from './message'
 
 export default class Index extends wepy.page {
   config = {
     navigationBarTitleText: '深大的树洞'
   }
 
+  components = {
+    list,
+    user,
+    message
+  }
+
   data = {
+    tab: 1
   }
 
   computed = {
   }
 
   methods = {
+    switchTapTo (tabIndex) {
+      this.tab = parseInt(tabIndex)
+    }
   }
 
   events = {
   }
 
   onLoad() {
-    console.log(store.state.userinfo) // {}
-
-    store.mutate(state => {
-      state.userinfo = {
-        name: 'Jason'
-      }
-      return state
-    }) // { name: 'Jason' }
-
-    store.mutate(state => {
-      state.userinfo.age = 21
-      return state
-    }) // { name: 'Jason', age: 21 }
   }
 }
 </script>
 
 <style lang="less">
+page {
+  background: #F4F4F4;
+  height: 100%;
+}
+
+.tabs {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  height: 50px;
+  width: 100%;
+  background: #FDFDFD;
+  border-top: 1px solid #DDD;
+  user-select: none;
+
+  .tab {
+    float: left;
+    width: 33.333333%;
+    height: 50px;
+    padding-top: 10px;
+    text-align: center;
+    user-select: none;
+
+    image {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
 </style>
