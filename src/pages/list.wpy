@@ -1,11 +1,38 @@
 <template>
-  <text>list page</text>
+  <view class="a"></view>
 </template>
 
 <script>
 import wepy from 'wepy'
+import store from '../store'
+import { api } from '../config'
+import http from '../utils/request'
 
 export default class List extends wepy.component {
+  data = {
+    list: [],
+    userinfo: store.state.userinfo
+  }
+
+  async onShow () {
+    try {
+      const list = await http({
+        url: api.list.url,
+        method: api.list.method
+      })
+
+      console.log(list)
+    } catch (e) {
+      wepy.showModal({
+        title: '提示',
+        content: `加载列表失败，请截图本提示，并联系深大汪峰。${e.message}`
+      })
+    }
+  }
+
+  onReload () {
+    console.log('list reload')
+  }
 }
 </script>
 
