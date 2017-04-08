@@ -1,6 +1,7 @@
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
+import interfaces from './interfaces'
 
 export default class extends wepy.app {
   config = {
@@ -19,6 +20,15 @@ export default class extends wepy.app {
   constructor () {
     super()
     this.use('requestfix')
+    this.use('promisify')
+  }
+
+  async onLaunch () {
+    try {
+      await interfaces.login()
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 </script>
