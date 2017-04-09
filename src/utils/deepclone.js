@@ -2,7 +2,7 @@
  * Object deepclone
  * @param {Object} obj the object need clone
  */
-function deepclone (obj) {
+module.exports = function deepclone (obj) {
   if (typeof obj !== 'object' || obj === null) {
     return obj
   }
@@ -19,5 +19,3 @@ function deepclone (obj) {
 
   return newObj
 }
-
-module.exports = deepclone

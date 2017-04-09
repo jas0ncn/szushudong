@@ -11,11 +11,14 @@ export default {
       } else {
         wepy.login().then((r) => {
           wepy.getUserInfo().then((res) => {
+            // store user info
             store.mutate(state => {
               state.userinfo = res.userInfo
               return state
             })
+
             res.code = r.code
+
             resolve(res)
           }).catch(reject)
         }).catch(reject)
@@ -29,8 +32,8 @@ export default {
     try {
       userinfoRaw = await this.getUserInfo()
       userinfo = await wepy.request({
-        url: api.login.url,
-        method: api.login.method,
+        url: api.user.login.url,
+        method: api.user.login.method,
         header: {
           'x-wechat-code': userinfoRaw.code,
           'x-wechat-encrypted': userinfoRaw.encryptedData,
