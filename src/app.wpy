@@ -27,7 +27,10 @@ export default class extends wepy.app {
     try {
       await interfaces.login()
     } catch (e) {
-      console.log(e)
+      wepy.showModal({
+        title: '提示',
+        content: `用户登录失败，请截图本提示，并联系深大汪峰。${e.message}`
+      })
     }
   }
 }
