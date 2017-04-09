@@ -47,21 +47,29 @@ export default class Index extends wepy.page {
     tab: 1,
     unreadList: 0,
     unreadMessages: 1,
-    userinfo: store.state.userinfo
+    userinfo: store.state.userinfo,
+    tabs: ['list', 'message', 'user']
   }
 
   methods = {
     switchTapTo (tabIndex) {
-      const tabs = ['list', 'message', 'user']
       tabIndex = parseInt(tabIndex)
 
       if (this.tab === tabIndex) {
-        this.$invoke(tabs[tabIndex - 1], 'onReload')
+        this.$invoke(this.tabs[tabIndex - 1], 'onReload')
       } else {
         this.tab = tabIndex
-        this.$invoke(tabs[tabIndex - 1], 'onShow')
+        this.$invoke(this.tabs[tabIndex - 1], 'onShow')
       }
     }
+  }
+
+  onPullDownRefresh () {
+    this.$invoke(this.tabs[this.tab - 1], 'onPullDownRefresh')
+  }
+
+  onReachBottom () {
+    this.$invoke(this.tabs[this.tab - 1], 'onReachBottom')
   }
 
   async onLoad () {

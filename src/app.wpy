@@ -12,7 +12,7 @@ export default class extends wepy.app {
       navigationBarBackgroundColor: '#FA6570',
       navigationBarTextStyle: 'white',
       backgroundColor: '#F8F8F8',
-      enablePullDownRefresh: false
+      enablePullDownRefresh: true
     }
   }
 

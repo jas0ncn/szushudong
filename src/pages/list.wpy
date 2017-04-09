@@ -12,7 +12,8 @@ import http from '../utils/request'
 export default class List extends wepy.component {
   data = {
     list: [],
-    userinfo: store.state.userinfo
+    userinfo: store.state.userinfo,
+    page: 1
   }
 
   components = {
@@ -37,9 +38,18 @@ export default class List extends wepy.component {
     try {
       const listResponse = await http({
         url: api.blog.list.url,
-        method: api.blog.list.method
+        method: api.blog.list.method,
+        data: {
+          page: this.page
+        }
       })
-      this.list = listResponse.data.data
+
+      if (this.page === 1) {
+        this.list = listResponse.data.data
+      } else {
+        this.list.push(...listResponse.data.data)
+      }
+
       this.$apply()
     } catch (e) {
       wepy.showModal({
@@ -47,6 +57,16 @@ export default class List extends wepy.component {
         content: `加载列表失败，请截图本提示，并联系深大汪峰。${e.message}`
       })
     }
+  }
+
+  async onPullDownRefresh () {
+    this.page = 1
+    await this.loadData()
+  }
+
+  async onReachBottom () {
+    this.page++
+    await this.loadData()
   }
 }
 </script>
