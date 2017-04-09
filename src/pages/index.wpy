@@ -8,10 +8,12 @@
     <div class="tab" catchtap="switchTapTo('1')">
       <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 1 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
+      <span class="badge" wx:if="{{ unreadList !== 0 }}"></span>
     </div>
     <div class="tab" catchtap="switchTapTo('2')">
       <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 2 }}"></image>
       <image src="../assets/svgs/message.svg"      wx:else></image>
+      <span class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</span>
     </div>
     <div class="tab" catchtap="switchTapTo('3')">
       <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 3 }}"></image>
@@ -42,6 +44,8 @@ export default class Index extends wepy.page {
 
   data = {
     tab: 1,
+    unreadList: 0,
+    unreadMessages: 1,
     userinfo: store.state.userinfo
   }
 
@@ -84,6 +88,7 @@ page {
 
   .tab {
     float: left;
+    position: relative;
     width: 33.333333%;
     height: 50px;
     padding-top: 10px;
@@ -93,6 +98,36 @@ page {
     image {
       width: 30px;
       height: 30px;
+    }
+
+    .badge {
+      position: absolute;
+      left: 50%;
+      top: 12px;
+      margin-left: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #FA6570;
+      border: 1px solid #FDFDFD;
+    }
+
+    .badge-number {
+      top: 7px;
+      margin-left: 6px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      color: #FFF;
+      font-size: 10px;
+      text-align: center;
+      line-height: 15px;
+    }
+
+    .badge-number-width {
+      padding: 0 2px;
+      width: auto;
+      border-radius: 8px;
     }
   }
 }
