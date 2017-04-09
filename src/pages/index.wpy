@@ -5,20 +5,20 @@
     <user    wx:if="{{ tab === 3 }}"></user>
   </view>
   <view class="tabs">
-    <div class="tab" catchtap="switchTapTo('1')">
+    <view class="tab" catchtap="switchTapTo('1')">
       <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 1 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
       <span class="badge" wx:if="{{ unreadList !== 0 }}"></span>
-    </div>
-    <div class="tab" catchtap="switchTapTo('2')">
+    </view>
+    <view class="tab" catchtap="switchTapTo('2')">
       <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 2 }}"></image>
       <image src="../assets/svgs/message.svg"      wx:else></image>
       <span class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</span>
-    </div>
-    <div class="tab" catchtap="switchTapTo('3')">
+    </view>
+    <view class="tab" catchtap="switchTapTo('3')">
       <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 3 }}"></image>
       <image src="../assets/svgs/my.svg"      wx:else></image>
-    </div>
+    </view>
   </view>
 </template>
 
@@ -63,7 +63,7 @@ export default class Index extends wepy.page {
     }
   }
 
-  onShow () {
+  onLoad () {
     // call list onShow in first load
     this.$invoke('list', 'onShow')
   }
