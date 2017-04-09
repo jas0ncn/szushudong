@@ -37,6 +37,10 @@ export default class extends wepy.app {
 </script>
 
 <style lang="less">
+view {
+  box-sizing: border-box;
+}
+
 .container {
   position: relative;
   height: 100%;
