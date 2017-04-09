@@ -5,17 +5,17 @@
     <user    wx:if="{{ tab === 3 }}"></user>
   </view>
   <view class="tabs">
-    <view class="tab" catchtap="switchTapTo('1')">
+    <view class="tab" @tap="switchTapTo('1')">
       <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 1 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
       <span class="badge" wx:if="{{ unreadList !== 0 }}"></span>
     </view>
-    <view class="tab" catchtap="switchTapTo('2')">
+    <view class="tab" @tap="switchTapTo('2')">
       <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 2 }}"></image>
       <image src="../assets/svgs/message.svg"      wx:else></image>
       <span class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</span>
     </view>
-    <view class="tab" catchtap="switchTapTo('3')">
+    <view class="tab" @tap="switchTapTo('3')">
       <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 3 }}"></image>
       <image src="../assets/svgs/my.svg"      wx:else></image>
     </view>
@@ -25,6 +25,7 @@
 <script>
 import wepy from 'wepy'
 import store from '../store'
+import interfaces from '../interfaces'
 
 // tabs
 import list from './list'
@@ -63,7 +64,16 @@ export default class Index extends wepy.page {
     }
   }
 
-  onLoad () {
+  async onLoad () {
+    try {
+      await interfaces.login()
+    } catch (e) {
+      wepy.showModal({
+        title: '提示',
+        content: `用户登录失败，请截图本提示，并联系深大汪峰。${e.message}`
+      })
+    }
+
     // call list onShow in first load
     this.$invoke('list', 'onShow')
   }
