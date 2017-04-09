@@ -1,22 +1,22 @@
 <template>
   <view class="container">
-    <list    wx:if="{{ tab === 1 }}"></list>
-    <message wx:if="{{ tab === 2 }}"></message>
-    <user    wx:if="{{ tab === 3 }}"></user>
+    <list    wx:if="{{ tab === 0 }}"></list>
+    <message wx:if="{{ tab === 1 }}"></message>
+    <user    wx:if="{{ tab === 2 }}"></user>
   </view>
   <view class="tabs">
-    <view class="tab" @tap="switchTapTo('1')">
-      <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 1 }}"></image>
+    <view class="tab" @tap="switchTapTo(0)">
+      <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 0 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
       <span class="badge" wx:if="{{ unreadList !== 0 }}"></span>
     </view>
-    <view class="tab" @tap="switchTapTo('2')">
-      <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 2 }}"></image>
+    <view class="tab" @tap="switchTapTo(1)">
+      <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 1 }}"></image>
       <image src="../assets/svgs/message.svg"      wx:else></image>
       <span class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</span>
     </view>
-    <view class="tab" @tap="switchTapTo('3')">
-      <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 3 }}"></image>
+    <view class="tab" @tap="switchTapTo(2)">
+      <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 2 }}"></image>
       <image src="../assets/svgs/my.svg"      wx:else></image>
     </view>
   </view>
@@ -44,7 +44,7 @@ export default class Index extends wepy.page {
   }
 
   data = {
-    tab: 1,
+    tab: 0,
     unreadList: 0,
     unreadMessages: 1,
     userinfo: store.state.userinfo,
@@ -56,20 +56,20 @@ export default class Index extends wepy.page {
       tabIndex = parseInt(tabIndex)
 
       if (this.tab === tabIndex) {
-        this.$invoke(this.tabs[tabIndex - 1], 'onReload')
+        this.$invoke(this.tabs[tabIndex], 'onReload')
       } else {
         this.tab = tabIndex
-        this.$invoke(this.tabs[tabIndex - 1], 'onShow')
+        this.$invoke(this.tabs[tabIndex], 'onShow')
       }
     }
   }
 
   onPullDownRefresh () {
-    this.$invoke(this.tabs[this.tab - 1], 'onPullDownRefresh')
+    this.$invoke(this.tabs[this.tab], 'onPullDownRefresh')
   }
 
   onReachBottom () {
-    this.$invoke(this.tabs[this.tab - 1], 'onReachBottom')
+    this.$invoke(this.tabs[this.tab], 'onReachBottom')
   }
 
   async onLoad () {
