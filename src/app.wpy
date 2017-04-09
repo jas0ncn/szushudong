@@ -30,6 +30,15 @@ navigator {
   box-sizing: border-box;
 }
 
+/** 修改默认的 navigator 点击态 **/
+.navigator-hover {
+    opacity: 1;
+}
+/** 自定义其他点击态样式类 **/
+.other-navigator-hover {
+    opacity: 1;
+}
+
 .container {
   position: relative;
   height: 100%;
