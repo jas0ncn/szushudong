@@ -1,6 +1,7 @@
 import wepy from 'wepy'
+import interfaces from '../interfaces'
 
-export default function request (options) {
+export default async function request (options) {
   if (options.header) {
     options.header['x-wechat-session'] = wepy.getStorageSync('_session')
   } else {
@@ -8,5 +9,18 @@ export default function request (options) {
       'x-wechat-session': wepy.getStorageSync('_session')
     }
   }
-  return wepy.request(options)
+
+  let response = await wepy.request(options)
+
+  if (response.statusCode === 401) {
+    await interfaces.login()
+    return wepy.request(options)
+  } else if (response.statusCode === 500) {
+    wepy.showModal({
+      title: '提示',
+      content: `服务器错误，请截图本提示，并联系深大汪峰。${response.data.errmsg}`
+    })
+  } else {
+    return response
+  }
 }
