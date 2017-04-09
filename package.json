@@ -1,15 +1,14 @@
 {
-  "name": "test",
-  "version": "1.2.8",
-  "description": "",
+  "name": "shudong2",
+  "version": "2.0.1",
+  "description": "深大的树洞 2.0",
   "main": "dist/app.js",
   "scripts": {
     "dev": "wepy build --watch",
-    "build": "cross-env NODE_ENV=production wepy build --no-cache",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "cross-env NODE_ENV=production wepy build --no-cache"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Jason",
+  "license": "GPL",
   "dependencies": {
     "wepy": "^1.5.1",
     "wepy-async-function": "^1.4.4",
