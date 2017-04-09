@@ -36,8 +36,8 @@ export default class List extends wepy.component {
   async loadData () {
     try {
       const listResponse = await http({
-        url: api.list.url,
-        method: api.list.method
+        url: api.blog.list.url,
+        method: api.blog.list.method
       })
       this.list = listResponse.data.data
       this.$apply()
