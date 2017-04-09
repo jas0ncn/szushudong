@@ -1,0 +1,198 @@
+<template>
+  <view class="list-container">
+    <view class="list-item">
+      <view class="list-item-fixed">置顶</view>
+      <view class="list-user">
+        <view class="list-user-avatar">
+          <image class="avatar" src="https://cdn.ijason.cc/static/avatar.jpg"></image>
+        </view>
+        <view class="list-user-info">
+          <view class="list-user-nickname">
+            <text class="nickname">Jason</text>
+            <image class="verify" src="../assets/svgs/person-v.svg"></image>
+          </view>
+          <text class="time-and-from">1 小时前 来自iPhone7</text>
+        </view>
+      </view>
+      <view class="list-item-body">
+        <text class="list-item-body-content">哇哈哈哈哈哈哈哈哈哈</text>
+        <view class="list-item-body-images">
+          <image
+            class="list-item-body-image" 
+            src="https://cloud.githubusercontent.com/assets/2182004/20554681/796da1ae-b198-11e6-91ab-e90f485c594d.png"
+            mode="aspectFill">
+          </image>
+        </view>
+      </view>
+      <view class="list-item-operations">
+        <view class="list-item-operation-like">
+          <image class="list-item-operation-icon" src="../assets/svgs/like.svg"></image>
+          <text class="number">1</text>
+        </view>
+        <view class="list-item-operation-comment">
+          <image class="list-item-operation-icon" src="../assets/svgs/comment.svg"></image>
+          <text class="number">3</text>
+        </view>
+        <view class="list-item-operation-more">
+          <image class="list-item-operation-icon" src="../assets/svgs/more.svg"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Clist extends wepy.component {
+}
+</script>
+
+<style lang="less">
+.list-container {
+  width: 100%;
+  overflow: hidden;
+
+  .list-item {
+    width: 100%;
+    padding: 15px;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+    background: #FFF;
+    overflow: hidden;
+
+    /* fixed */
+    .list-item-fixed {
+      position: absolute;
+      top: 24px;
+      right: 0;
+      padding: 5px 7px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #FFF;
+      border-radius: 4px 0 0 4px;
+      text-align: center;
+      background: #fa6570;
+    }
+
+    .list-user {
+      width: 100%;
+      overflow: hidden;
+
+      .list-user-avatar {
+        float: left;
+
+        .avatar {
+          width: 45px;
+          height: 45px;
+          border-radius: 3px;
+        }
+      }
+
+      .list-user-info {
+        float: left;
+        padding-left: 10px;
+
+        .list-user-nickname {
+          overflow: hidden;
+
+          .nickname {
+            float: left;
+            margin-top: 5px;
+            margin-right: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 20px;
+            color: #333;
+          }
+
+          .verify {
+            float: left;
+            width: 15px;
+            height: 15px;
+            margin-top: 6px;
+          }
+        }
+
+        .time-and-from {
+          width: 100%;
+          margin-top: 2px;
+          font-size: 12px;
+          color: #777;
+          display: block;
+        }
+      }
+    }
+
+    /* body */
+    .list-item-body {
+      width: 100%;
+      margin-top: 10px;
+      box-sizing: border-box;
+      overflow: hidden;
+
+      .list-item-body-content {
+        float: left;
+        width: 100%;
+        font-size: 16px;
+        line-height: 24px;
+        color: #333;
+        text-align: justify;
+      }
+
+      .list-item-body-images {
+        float: left;
+        width: 100%;
+        margin-top: 10px;
+
+        .list-item-body-image {
+          float: left;
+          width: 30%;
+          margin-right: 5px;
+          margin-top: 5px;
+          height: 110px;
+        }
+      }
+    }
+
+    .list-item-operations {
+      width: 100%;
+      margin-top: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #EEE;
+      overflow: hidden;
+
+      .list-item-operation-like,
+      .list-item-operation-comment,
+      .list-item-operation-more {
+        float: left;
+        width: 70px;
+        position: relative;
+        text-align: center;
+
+        .list-item-operation-icon {
+          margin-right: 5px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .number {
+          position: absolute;
+          top: 5px;
+          left: 50%;
+          margin-left: 12px;
+          color: #999;
+          font-size: 14px;
+          line-height: 14px;
+          font-weight: bold;
+        }
+      }
+
+      .list-item-operation-more {
+        float: right;
+        text-align: center;
+      }
+    }
+  }
+}
+</style>

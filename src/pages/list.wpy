@@ -1,9 +1,10 @@
 <template>
-  <view class="a"></view>
+  <clist></clist>
 </template>
 
 <script>
 import wepy from 'wepy'
+import clist from '../components/clist'
 import store from '../store'
 import { api } from '../config'
 import http from '../utils/request'
@@ -14,24 +15,38 @@ export default class List extends wepy.component {
     userinfo: store.state.userinfo
   }
 
+  components = {
+    clist
+  }
+
+  /**
+   * lifecycles hook
+   */
   async onShow () {
+    await this.loadData()
+  }
+
+  async onReload () {
+    await this.loadData()
+  }
+
+  /**
+   * common functions
+   */
+  async loadData () {
     try {
-      const list = await http({
+      const listResponse = await http({
         url: api.list.url,
         method: api.list.method
       })
-
-      console.log(list)
+      this.list = listResponse.data.data
+      this.$apply()
     } catch (e) {
       wepy.showModal({
         title: '提示',
         content: `加载列表失败，请截图本提示，并联系深大汪峰。${e.message}`
       })
     }
-  }
-
-  onReload () {
-    console.log('list reload')
   }
 }
 </script>
