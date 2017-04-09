@@ -1,4 +1,4 @@
-const env = 'development' // 'development' or 'production'
+const env = 'production' // 'development' or 'production'
 const hosts = {
   development: 'http://localhost:3020',
   production: 'https://sd.iszu.cn'
@@ -24,6 +24,10 @@ const api = {
   list: {
     method: 'GET',
     url: '/blog/list'
+  },
+  like: {
+    method: 'POST',
+    url: '/blog/like'
   }
 }
 
