@@ -1,50 +1,182 @@
 <template>
   <view class="list-container">
-    <view class="list-item">
-      <view class="list-item-fixed">置顶</view>
+    <navigator
+      wx:for="{{ list }}"
+      wx:for-item="item"
+      wx:key="{{ idx }}"
+      wx:for-index="idx"
+      url="/pages/detail?id={{ item.id }}"
+      open-type="navigate"
+      class="list-item">
+      <view class="list-item-fixed" wx:if="{{ item.isFixed }}">置顶</view>
+      <!-- User Info -->
       <view class="list-user">
         <view class="list-user-avatar">
-          <image class="avatar" src="https://cdn.ijason.cc/static/avatar.jpg"></image>
+          <image
+            class="avatar"
+            src="{{ item.user.avatar }}">
+          </image>
         </view>
         <view class="list-user-info">
           <view class="list-user-nickname">
-            <text class="nickname">Jason</text>
-            <image class="verify" src="../assets/svgs/person-v.svg"></image>
+            <text class="nickname">{{ item.user.nickname }}</text>
+            <image
+              wx:if="{{ item.user.isVerify }}"
+              class="verify"
+              src="../assets/svgs/person-v.svg">
+            </image>
           </view>
-          <text class="time-and-from">1 小时前 来自iPhone7</text>
+          <text class="time-and-from">{{ item.time + ' 来自' + item.device }}</text>
         </view>
       </view>
+      <!-- Blog Body -->
       <view class="list-item-body">
-        <text class="list-item-body-content">哇哈哈哈哈哈哈哈哈哈</text>
-        <view class="list-item-body-images">
+        <text class="list-item-body-content" selectable="true">{{ item.text }}</text>
+        <view class="list-item-body-images" wx:if="{{ item.images.length !== 0 }}">
           <image
+            wx:for-item="image"
+            wx:for="{{ item.images }}"
+            wx:for-index="i"
+            wx:key="{{ i }}"
+            @tap.stop="viewPic({{ image }}, {{ item.images }})"
+            src="{{ image }}"
             class="list-item-body-image" 
-            src="https://cloud.githubusercontent.com/assets/2182004/20554681/796da1ae-b198-11e6-91ab-e90f485c594d.png"
             mode="aspectFill">
           </image>
         </view>
       </view>
+      <!-- Blog Operations -->
       <view class="list-item-operations">
         <view class="list-item-operation-like">
-          <image class="list-item-operation-icon" src="../assets/svgs/like.svg"></image>
-          <text class="number">1</text>
+          <image
+            @tap.stop="like({{ idx }}, {{ item.id }})"
+            class="list-item-operation-icon"
+            src="{{ item.like ? '../assets/svgs/like-fill.svg' : '../assets/svgs/like.svg' }}"></image>
+          <text class="number {{ item.like ? 'active' : '' }}" wx:if="{{ item.likeNum !== 0 }}">{{ item.likeNum }}</text>
         </view>
-        <view class="list-item-operation-comment">
+        <navigator
+          url="/pages/detail?id={{ item.id }}"
+          open-type="navigate"
+          class="list-item-operation-comment">
           <image class="list-item-operation-icon" src="../assets/svgs/comment.svg"></image>
-          <text class="number">3</text>
-        </view>
-        <view class="list-item-operation-more">
-          <image class="list-item-operation-icon" src="../assets/svgs/more.svg"></image>
+          <text class="number" wx:if="{{ item.commentNum !== 0 }}">{{ item.commentNum }}</text>
+        </navigator>
+        <view
+          class="list-item-operation-more"
+          wx:if="{{ item.isAdmin }}">
+          <image
+            @tap.stop="showMore({{ idx }}, {{ item.id }})"
+            class="list-item-operation-icon"
+            src="../assets/svgs/more.svg"></image>
         </view>
       </view>
-    </view>
+    </navigator>
   </view>
 </template>
 
 <script>
 import wepy from 'wepy'
+import http from '../utils/request'
+import { api } from '../config'
 
 export default class Clist extends wepy.component {
+  props = {
+    list: Object
+  }
+
+  methods = {
+    /**
+     * 查看大图
+     * @param {String} cur 当前展示图片
+     * @param {Array}  imageList 展示的图片列表
+     */
+    viewPic (cur, imageList) {
+      wepy.previewImage({
+        current: cur,
+        urls: imageList
+      })
+    },
+
+    /**
+     * 点赞
+     * @param {Number} idx 点赞树洞的索引
+     * @param {Number} id  点赞树洞的 id
+     */
+    async like (idx, id) {
+      const list = this.list
+      list[idx].like = !list[idx].like
+
+      if (list[idx].like) {
+        list[idx].likeNum++
+      } else {
+        list[idx].likeNum--
+      }
+
+      // apply change
+      this.$apply()
+
+      // commit request
+      try {
+        await http({
+          url: api.blog.like.url,
+          method: api.blog.like.method,
+          data: {
+            bid: id
+          }
+        })
+      } catch (e) {
+        // roll back when request failed
+        console.log(e)
+
+        list[idx].like = !list[idx].like
+
+        if (list[idx].like) {
+          list[idx].likeNum++
+        } else {
+          list[idx].likeNum--
+        }
+
+        this.$apply()
+      }
+    },
+
+    /**
+     * 显示更多操作
+     * @param {Number} idx 点赞树洞的索引
+     * @param {Number} id  点赞树洞的 id
+    */
+    async showMore (idx, id) {
+      try {
+        const { tapIndex } = await wepy.showActionSheet({
+          itemList: [
+            '删除'
+          ]
+        })
+
+        if (tapIndex === 0) {
+          this.list.splice(idx, 1)
+
+          await http({
+            url: api.blog.delete.url,
+            method: api.blog.delete.method,
+            data: {
+              bid: id
+            }
+          })
+        }
+      } catch (e) {
+        console.log('User cancel')
+      }
+    }
+  }
+
+  onShareAppMessage () {
+    return {
+      title: '深大树洞',
+      desc: '深大树洞首页~快来匿名发表树洞啊~',
+      path: '/pages/index'
+    }
+  }
 }
 </script>
 
@@ -135,7 +267,7 @@ export default class Clist extends wepy.component {
         float: left;
         width: 100%;
         font-size: 16px;
-        line-height: 24px;
+        line-height: 28px;
         color: #333;
         text-align: justify;
       }
@@ -185,6 +317,10 @@ export default class Clist extends wepy.component {
           font-size: 14px;
           line-height: 14px;
           font-weight: bold;
+        }
+
+        .active {
+          color: #FA6570;
         }
       }
 
