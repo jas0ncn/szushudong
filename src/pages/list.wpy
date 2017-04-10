@@ -23,12 +23,15 @@ export default class List extends wepy.component {
   /**
    * lifecycles hook
    */
-  async onShow () {
+  async onComponentLoad () {
     await this.loadData()
   }
 
   async onReload () {
     await this.loadData()
+  }
+
+  onShow () {
   }
 
   /**
