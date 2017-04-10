@@ -50,6 +50,7 @@ export default class List extends wepy.component {
         this.list.push(...listResponse.data.data)
       }
 
+      wepy.stopPullDownRefresh()
       this.$apply()
     } catch (e) {
       wepy.showModal({

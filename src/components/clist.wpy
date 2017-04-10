@@ -1,6 +1,14 @@
 <template>
   <view class="list-container">
     <navigator
+      url="/pages/new"
+      open-type="navigate"
+      hover-class="newBtn-hover"
+      hover-stay-time="200"
+      class="newBtn">
+      <image src="../assets/svgs/write.svg" class="newBtn-icon"></image>
+    </navigator>
+    <navigator
       wx:for="{{ list }}"
       wx:for-item="item"
       wx:key="{{ idx }}"
@@ -14,7 +22,7 @@
         <view class="list-user-avatar">
           <image
             class="avatar"
-            src="{{ item.user.avatar }}">
+            src="{{ item.user.avatar === '../../assert/avatar.png' ? '../assets/svgs/avatar/avatar.svg' : item.user.avatar }}">
           </image>
         </view>
         <view class="list-user-info">
@@ -47,9 +55,11 @@
       </view>
       <!-- Blog Operations -->
       <view class="list-item-operations">
-        <view class="list-item-operation-like">
+        <view
+          @tap.stop="like({{ idx }}, {{ item.id }})"
+          hover-class="list-item-operation-like-scale"
+          class="list-item-operation-like">
           <image
-            @tap.stop="like({{ idx }}, {{ item.id }})"
             class="list-item-operation-icon"
             src="{{ item.like ? '../assets/svgs/like-fill.svg' : '../assets/svgs/like.svg' }}"></image>
           <text class="number {{ item.like ? 'active' : '' }}" wx:if="{{ item.likeNum !== 0 }}">{{ item.likeNum }}</text>
@@ -62,10 +72,10 @@
           <text class="number" wx:if="{{ item.commentNum !== 0 }}">{{ item.commentNum }}</text>
         </navigator>
         <view
+          @tap.stop="showMore({{ idx }}, {{ item.id }})"
           class="list-item-operation-more"
           wx:if="{{ item.isAdmin }}">
           <image
-            @tap.stop="showMore({{ idx }}, {{ item.id }})"
             class="list-item-operation-icon"
             src="../assets/svgs/more.svg"></image>
         </view>
@@ -183,7 +193,34 @@ export default class Clist extends wepy.component {
 <style lang="less">
 .list-container {
   width: 100%;
+  margin-bottom: 60px;
   overflow: hidden;
+
+  /* new btn */
+  .newBtn {
+    position: fixed;
+    right: 20px;
+    bottom: 70px;
+    width: 60px;
+    height: 60px;
+    background: #FA6570;
+    border-radius: 50%;
+    text-align: center;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.4);
+    transition: all 150ms ease;
+    z-index: 100;
+
+    .newBtn-icon {
+      margin-top: 15px;
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .newBtn-hover {
+    background: #D75760;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  }
 
   .list-item {
     width: 100%;
@@ -324,11 +361,27 @@ export default class Clist extends wepy.component {
         }
       }
 
+      .list-item-operation-like-scale {
+        animation: clickAnimation 300ms ease;
+      }
+
       .list-item-operation-more {
         float: right;
         text-align: center;
       }
     }
+  }
+}
+
+@keyframes clickAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 </style>

@@ -90,7 +90,7 @@ export default class Index extends wepy.page {
 
 <style lang="less">
 page {
-  background: #F4F4F4;
+  background: #EEE;
   height: 100%;
 }
 
