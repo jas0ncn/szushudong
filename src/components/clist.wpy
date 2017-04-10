@@ -200,14 +200,6 @@ export default class Clist extends wepy.component {
       })
     }
   }
-
-  onShareAppMessage () {
-    return {
-      title: '深大树洞',
-      desc: '深大树洞首页~快来匿名发表树洞啊~',
-      path: '/pages/index'
-    }
-  }
 }
 </script>
 

@@ -1,0 +1,16 @@
+<template>
+  <text>detail page</text>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Detail extends wepy.page {
+  config = {
+    navigationBarTitleText: '树洞正文'
+  }
+}
+</script>
+
+<style lang="less">
+</style>

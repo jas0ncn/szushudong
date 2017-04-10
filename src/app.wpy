@@ -6,7 +6,8 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
-      'pages/new'
+      'pages/new',
+      'pages/detail'
     ],
     window: {
       navigationBarTitleText: '深大的树洞',
