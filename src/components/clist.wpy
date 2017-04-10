@@ -52,6 +52,13 @@
             mode="aspectFill">
           </image>
         </view>
+        <view
+          class="list-item-location"
+          wx:if="{{ item.location !== '' && item.location !== undefined }}"
+          @tap.stop="showLocation({{ item.latitude }}, {{ item.longitude }})">
+          <image class="location-icon" src="../assets/svgs/location.svg"></image>
+          <text>{{ item.location }}</text>
+        </view>
       </view>
       <!-- Blog Operations -->
       <view class="list-item-operations">
@@ -165,6 +172,7 @@ export default class Clist extends wepy.component {
 
         if (tapIndex === 0) {
           this.list.splice(idx, 1)
+          this.$apply()
 
           await http({
             url: api.blog.delete.url,
@@ -177,6 +185,19 @@ export default class Clist extends wepy.component {
       } catch (e) {
         console.log('User cancel')
       }
+    },
+
+    /**
+     * 显示地图
+     * @param {Float} latitude  纬度
+     * @param {Float} longitude 经度
+     */
+    showLocation (latitude, longitude) {
+      wepy.openLocation({
+        latitude,
+        longitude,
+        scale: 28
+      })
     }
   }
 
@@ -319,6 +340,26 @@ export default class Clist extends wepy.component {
           margin-right: 5px;
           margin-top: 5px;
           height: 110px;
+        }
+      }
+
+      .list-item-location {
+        float: left;
+        margin-top: 10px;
+        width: 250px;
+        height: 24px;
+
+        .location-icon {
+          width: 24px;
+          height: 24px;
+          vertical-align: middle;
+        }
+
+        text {
+          font-size: 14px;
+          line-height: 24px;
+          font-weight: bold;
+          color: #FA6570;
         }
       }
     }
