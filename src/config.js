@@ -42,6 +42,14 @@ const api = {
     delete: {
       method: 'POST',
       url: '/blog/delete'
+    },
+    imageUpload: {
+      method: 'POST',
+      url: '/blog/image'
+    },
+    new: {
+      method: 'POST',
+      url: '/blog'
     }
   }
 }

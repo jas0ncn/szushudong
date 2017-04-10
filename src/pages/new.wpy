@@ -1,0 +1,434 @@
+<template>
+  <view class="new">
+    <textarea
+      class="textarea"
+      auto-focus
+      bindinput="inputChange"
+      maxlength="-1"
+      placeholder="写下你想丢给树洞的话吧~"
+      placeholder-style="color: #999;">
+    </textarea>
+    <view class="image-list">
+      <!-- preview the image which already be choosed -->
+      <view
+        class="choosed-image-list"
+        wx:for="{{ images }}"
+        wx:for-item="image"
+        wx:for-index="idx"
+        wx:key="{{ idx }}">
+        <image
+          src="{{ image }}"
+          mode="aspectFill"
+          @tap.stop="previewImage({{ image }}, {{ images }})"
+          class="choosed-image"></image>
+        <view
+          class="choosed-image-delete-btn"
+          @tap.stop="deleteImage({{ idx }})">
+          <image
+            class="choosed-image-delete-btn-icon"
+            src="../assets/svgs/delete.svg"></image>
+        </view>
+      </view>
+      <!-- image choosing btn -->
+      <view
+        class="choose-image-btn"
+        wx:if="{{ images.length < 9 }}"
+        bindtap="chooseImage">
+        <image
+          class="choose-image-btn-icon"
+          src="../assets/svgs/choose-image.svg">
+        </image>
+      </view>
+    </view>
+    <view class="isanonymous">
+      <view
+        class="location {{ location === '' ? '' : 'location-active' }}"
+        @tap.stop="chooseLocation"
+        @longtap.stop="removeLocation">
+        <image class="location-icon" src="../assets/svgs/location.svg"></image>
+        <text>{{ location === '' ? '点击添加位置' : location }}</text>
+      </view>
+      <view
+        class="isanonymous-btn {{ isAnonymous ? 'anonymous' : 'named' }}"
+        @tap.stop="anonymousChange">
+        <text class="anonymous-text">匿名</text>
+        <text class="named-text">实名</text>
+        <view class="isanonymous-btn-key"></view>
+      </view>
+    </view>
+    <view class="submit-btn">
+      <button
+        type="primary"
+        size="default"
+        bindtap="send"
+        class="submit"
+        disabled="{{ disabled }}">
+        发送
+      </button>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import { api } from '../config'
+import http from '../utils/request'
+import sensitiveWordChecker from '../utils/sensitiveWordChecker'
+
+export default class NewBlog extends wepy.page {
+  config = {
+    navigationBarTitleText: '发布新树洞'
+  }
+
+  data = {
+    content: '',
+    images: [],
+    isAnonymous: false,
+    device: '',
+    location: '',
+    latitude: '',
+    longitude: '',
+    disabled: true
+  }
+
+  methods = {
+    /**
+     * 输入监听器
+     * 自动映射到 content
+     * @param {Event} e 输入事件
+     */
+    inputChange (e) {
+      this.content = e.detail.value
+      this.disabled = e.detail.value === ''
+    },
+
+    /**
+     * 选择图片
+     */
+    async chooseImage () {
+      const { tempFilePaths } = await wepy.chooseImage({
+        count: 9 - this.images.length,
+        sizeType: 'compressed'
+      })
+      this.images.push(...tempFilePaths)
+      this.$apply()
+    },
+
+    /**
+     * 查看大图
+     * @param {String} cur 当前展示图片
+     * @param {Array}  imageList 展示的图片列表
+     */
+    previewImage (cur, imageList) {
+      wepy.previewImage({
+        current: cur,
+        urls: imageList
+      })
+    },
+
+    /**
+     * 删除选中图片
+     * @param {Number} idx 要删除的图片索引
+     */
+    deleteImage (idx) {
+      this.images.splice(idx, 1)
+      this.$apply()
+    },
+
+    /**
+     * 添加位置
+     */
+    async chooseLocation () {
+      try {
+        const { name, latitude, longitude } = await wepy.chooseLocation()
+        this.location = name
+        this.latitude = latitude
+        this.longitude = longitude
+        this.$apply()
+      } catch (e) {}
+    },
+
+    /**
+     * 删除地理位置
+     */
+    removeLocation () {
+      this.location = ''
+      this.latitude = ''
+      this.longitude = ''
+      this.$apply()
+    },
+
+    /**
+     * 切换实名、匿名
+     */
+    anonymousChange () {
+      this.isAnonymous = !this.isAnonymous
+      this.$apply()
+    },
+
+    /**
+     * 发送树洞
+     */
+    async send () {
+      wepy.showToast({
+        title: '发送中...',
+        icon: 'loading',
+        duration: 10000,
+        mask: true
+      })
+
+      if (sensitiveWordChecker(this.content)) {
+        wepy.hideToast()
+        wepy.showModal({
+          title: '提示',
+          content: '包含敏感词汇，发送失败：）'
+        })
+        return
+      }
+
+      const pack = {
+        content: this.content,
+        isAnonymous: this.isAnonymous,
+        images: [],
+        device: this.device,
+        location: this.location,
+        latitude: this.latitude,
+        longitude: this.longitude
+      }
+
+      // upload images
+      if (this.images.length > 0) {
+        try {
+          for (let v of this.images) {
+            const r = await wepy.uploadFile({
+              url: api.blog.imageUpload.url,
+              filePath: v,
+              name: 'file',
+              formData: {
+                _session: wepy.getStorageSync('_session')
+              }
+            })
+
+            r.data = JSON.parse(r.data)
+
+            if (r.data.errcode === 0 && r.data.data.url) {
+              pack.images.push(r.data.data.url)
+            } else {
+              wepy.hideToast()
+              wepy.showModal({
+                title: '提示',
+                content: '服务器错误，上传图片失败。请重试~：）' + r.data.errmsg
+              })
+              return
+            }
+          }
+        } catch (e) {
+          wepy.hideToast()
+          wepy.showModal({
+            title: '提示',
+            content: '服务器错误，上传图片失败。请重试或截图本提示联系深大汪峰。' + e.message
+          })
+          return
+        }
+      }
+
+      // upload blog
+      try {
+        await http({
+          url: api.blog.new.url,
+          method: api.blog.new.method,
+          data: pack
+        })
+      } catch (e) {
+        wepy.hideToast()
+        wepy.showModal({
+          title: '提示',
+          content: '发送树洞失败。请截图本提示，联系深大汪峰。' + e.message
+        })
+        return
+      }
+
+      wepy.hideToast()
+      await wepy.showToast({
+        title: '发送成功！',
+        icon: 'success',
+        duration: 1500,
+        mask: true
+      })
+
+      await wepy.navigateBack({
+        delta: 1
+      })
+    }
+  }
+
+  // load device info
+  async onShow () {
+    const { model } = await wepy.getSystemInfo()
+    this.device = model.replace(/<.*>/, '')
+  }
+}
+</script>
+
+<style lang="less">
+.new {
+  width: 100%;
+  
+  .textarea {
+    padding: 15px;
+    width: 100%;
+    color: #333;
+    min-height: 180px;
+    background: #FFF;
+    font-size: 16px;
+    line-height: 36px;
+  }
+
+  .image-list {
+    padding: 15px;
+    padding-top: 0;
+    width: 100%;
+    background: #FFF;
+    overflow: hidden;
+
+    .choosed-image-list {
+      position: relative;
+      float: left;
+      width: 70px;
+      height: 70px;
+      margin-right: 15px;
+      margin-top: 15px;
+
+      .choosed-image {
+        width: 100%;
+        height: 100%;
+      }
+
+      .choosed-image-delete-btn {
+        position: absolute;
+        right: -10px;
+        top: -10px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .choosed-image-delete-btn-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    .choose-image-btn {
+      float: left;
+      width: 70px;
+      height: 70px;
+      margin-top: 15px;
+
+      .choose-image-btn-icon {
+        width: 70px;
+        height: 70px;
+      }
+    }
+  }
+
+  .isanonymous {
+    background: #FFF;
+    padding: 15px;
+    padding-top: 0;
+    overflow: hidden;
+
+    .location {
+      float: left;
+      width: 250px;
+      height: 32px;
+
+      .location-icon {
+        width: 32px;
+        height: 32px;
+        vertical-align: middle;
+      }
+
+      text {
+        font-size: 14px;
+        line-height: 32px;
+        color: #666;
+      }
+    }
+    .location-active {
+      text {
+        font-weight: bold;
+        color: #FA6570;
+      }
+    }
+
+    .isanonymous-btn {
+      position: relative;
+      float: right;
+      width: 66px;
+      height: 32px;
+      padding: 0 6px;
+      border-radius: 18px;
+      transition: all 300ms ease;
+
+      text {
+        color: #FFF;
+        font-size: 12px;
+        line-height: 32px;
+      }
+      .anonymous-text {
+        float: left;
+      }
+      .named-text {
+        float: right;
+      }
+
+      .isanonymous-btn-key {
+        position: absolute;
+        left: 1px;
+        top: 1px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #FFF;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.4);
+        transition: all 300ms ease;
+      }
+    }
+    .anonymous {
+      background: #FA6570;
+
+      .isanonymous-btn-key {
+        transform: translateX(34px);
+      }
+    }
+    .named {
+      background: #2ECC71;
+
+      .isanonymous-btn-key {
+        transform: translateX(0);
+      }
+    }
+  }
+
+  .submit-btn {
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 90%;
+
+    .submit {
+      width: 100%;
+      color: #FFF;
+      background: #FA6570;
+      border: none;
+    }
+    
+    button[disabled][type="primary"] {
+      opacity: 0.7
+    }
+
+    .button-hover {
+      background: #d75760;
+    }
+  }
+}
+</style>

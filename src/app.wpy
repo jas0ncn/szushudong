@@ -5,7 +5,8 @@ import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      'pages/index',
+      'pages/new'
     ],
     window: {
       navigationBarTitleText: '深大的树洞',
@@ -25,8 +26,14 @@ export default class extends wepy.app {
 </script>
 
 <style lang="less">
+page {
+  background: #EEE;
+  height: 100%;
+}
+
 view,
-navigator {
+navigator,
+textarea {
   box-sizing: border-box;
 }
 
