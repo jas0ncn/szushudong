@@ -1,12 +1,12 @@
 <template>
   <view class="container">
-    <view class="page {{ tab === 0 ? 'visible' : 'hide' }}">
+    <view class="page page-list {{ tab === 0 ? 'visible' : 'hide' }}">
       <list></list>
     </view>
-    <view class="page {{ tab === 1 ? 'visible' : 'hide' }}">
+    <view class="page" wx:if="{{ tab === 1 }}">
       <message></message>
     </view>
-    <view class="page {{ tab === 2 ? 'visible' : 'hide' }}">
+    <view class="page" wx:if="{{ tab === 2 }}">
       <user></user>
     </view>
   </view>
@@ -101,11 +101,14 @@ page {
 }
 
 .page {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+}
+.page-list {
+  position: static;
 }
 .visible {
   visibility: visible;
