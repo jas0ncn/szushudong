@@ -33,7 +33,11 @@ const api = {
   blog: {
     list: {
       method: 'GET',
-      url: '/blog/list'
+      url: '/v2/blogs'
+    },
+    detail: {
+      method: 'GET',
+      url: '/v2/blogs'
     },
     like: {
       method: 'POST',
@@ -49,7 +53,15 @@ const api = {
     },
     new: {
       method: 'POST',
-      url: '/blog'
+      url: '/v2/blogs'
+    },
+    comment: {
+      method: 'POST',
+      url: '/v2/comments'
+    },
+    deleteComment: {
+      method: 'DELETE',
+      url: '/v2/comments'
     }
   }
 }
