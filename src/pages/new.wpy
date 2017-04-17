@@ -181,9 +181,36 @@ export default class NewBlog extends wepy.page {
         wepy.hideToast()
         wepy.showModal({
           title: '提示',
-          content: '包含敏感词汇，发送失败：）'
+          content: '包含敏感词汇，发送失败：）',
+          showCancel: false
         })
         return
+      }
+
+      if (/自杀|不想活了/.test(this.content)) {
+        wepy.hideToast()
+        const status = await wepy.showModal({
+          title: '温馨提示',
+          content: '需要帮助？深圳 24 小时免费心理咨询热线：0755-28793123',
+          cancelText: '拨打热线',
+          cancelColor: '#3CC51F',
+          confirmText: '继续发送',
+          confirmColor: '#666666'
+        })
+
+        if (!status.confirm) {
+          await wepy.makePhoneCall({
+            phoneNumber: '0755-28793123'
+          })
+          return
+        } else {
+          wepy.showToast({
+            title: '发送中...',
+            icon: 'loading',
+            duration: 10000,
+            mask: true
+          })
+        }
       }
 
       const pack = {
@@ -217,7 +244,8 @@ export default class NewBlog extends wepy.page {
               wepy.hideToast()
               wepy.showModal({
                 title: '提示',
-                content: '服务器错误，上传图片失败。请重试~：）' + r.data.errmsg
+                content: '服务器错误，上传图片失败。请重试~：）' + r.data.errmsg,
+                showCancel: false
               })
               return
             }
@@ -226,7 +254,8 @@ export default class NewBlog extends wepy.page {
           wepy.hideToast()
           wepy.showModal({
             title: '提示',
-            content: '服务器错误，上传图片失败。请重试或截图本提示联系深大汪峰。' + e.message
+            content: '服务器错误，上传图片失败。请重试或截图本提示联系深大汪峰。' + e.message,
+            showCancel: false
           })
           return
         }
@@ -243,7 +272,8 @@ export default class NewBlog extends wepy.page {
         wepy.hideToast()
         wepy.showModal({
           title: '提示',
-          content: '发送树洞失败。请截图本提示，联系深大汪峰。' + e.message
+          content: '发送树洞失败。请截图本提示，联系深大汪峰。' + e.message,
+          showCancel: false
         })
         return
       }
