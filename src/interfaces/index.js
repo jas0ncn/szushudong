@@ -2,7 +2,7 @@ import wepy from 'wepy'
 import store from '../store'
 import { api } from '../config'
 
-export default {
+const interfaces = {
   async getUserInfo () {
     const loginData = await wepy.login()
     const userinfo = await wepy.getUserInfo()
@@ -21,7 +21,7 @@ export default {
     let userinfo = {}
 
     try {
-      userinfoRaw = await this.getUserInfo()
+      userinfoRaw = await interfaces.getUserInfo()
       userinfo = await wepy.request({
         url: api.user.login.url,
         method: api.user.login.method,
@@ -46,3 +46,5 @@ export default {
     }
   }
 }
+
+export default interfaces
