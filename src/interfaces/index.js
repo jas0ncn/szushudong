@@ -5,24 +5,19 @@ import { api } from '../config'
 export default {
   getUserInfo () {
     return new Promise((resolve, reject) => {
-      const cache = store.state.userinfo
-      if (cache) {
-        resolve(cache)
-      } else {
-        wepy.login().then((r) => {
-          wepy.getUserInfo().then((res) => {
-            // store user info
-            store.mutate(state => {
-              state.userinfo = res.userInfo
-              return state
-            })
+      wepy.login().then((r) => {
+        wepy.getUserInfo().then((res) => {
+          res.code = r.code
 
-            res.code = r.code
+          // store user info
+          store.mutate(state => {
+            state.userinfo = res.userInfo
+            return state
+          })
 
-            resolve(res)
-          }).catch(reject)
+          resolve(res)
         }).catch(reject)
-      }
+      }).catch(reject)
     })
   },
   async login () {

@@ -1,16 +1,789 @@
 <template>
-  <text>detail page</text>
+  <view class="page" wx:if="{{ !loading }}">
+    <!-- blog content -->
+    <view class="blog">
+      <!-- User Info -->
+      <view class="blog-user">
+        <view class="blog-user-avatar">
+          <image
+            class="avatar"
+            src="{{ blog.user.avatar === '../../assert/avatar.png' ? '../assets/svgs/avatar/avatar.svg' : blog.user.avatar }}">
+          </image>
+        </view>
+        <view class="blog-user-info">
+          <view class="blog-user-nickname">
+            <text class="nickname">{{ blog.user.nickname }}</text>
+            <image
+              wx:if="{{ blog.user.isVerified }}"
+              class="verify"
+              src="../assets/svgs/person-v.svg">
+            </image>
+          </view>
+          <text class="time-and-from">{{ blog.time + ' 来自' + blog.device }}</text>
+        </view>
+      </view>
+      <!-- Blog Body -->
+      <view class="blog-item-body">
+        <text class="blog-item-body-content" selectable="true">{{ blog.text }}</text>
+        <view class="blog-item-body-images" wx:if="{{ blog.images.length !== 0 }}">
+          <image
+            wx:for-item="image"
+            wx:for="{{ blog.images }}"
+            wx:for-index="i"
+            wx:key="{{ i }}"
+            @tap.stop="viewPic({{ image }}, {{ blog.images }})"
+            src="{{ image }}"
+            class="blog-item-body-image" 
+            mode="aspectFill">
+          </image>
+        </view>
+        <view
+          class="blog-item-location"
+          wx:if="{{ blog.location.locationName }}"
+          @tap.stop="showLocation({{ blog.location.latitude }}, {{ blog.location.longitude }})">
+          <image class="location-icon" src="../assets/svgs/location.svg"></image>
+          <text>{{ blog.location.locationName }}</text>
+        </view>
+      </view>
+      <!-- Blog Operations -->
+      <view class="blog-item-operations">
+        <view
+          @tap.stop="like()"
+          hover-class="blog-item-operation-like-scale"
+          class="blog-item-operation-like">
+          <image
+            class="blog-item-operation-icon"
+            src="{{ blog.like ? '../assets/svgs/like-fill.svg' : '../assets/svgs/like.svg' }}"></image>
+        </view>
+        <view
+          @tap.stop="comment"
+          class="blog-item-operation-comment">
+          <image class="blog-item-operation-icon" src="../assets/svgs/comment.svg"></image>
+        </view>
+        <view
+          @tap.stop="showMore({{ idx }}, {{ blog.id }})"
+          class="blog-item-operation-more"
+          wx:if="{{ blog.user.isAdmin || blog.user.isAuthor }}">
+          <image
+            class="blog-item-operation-icon"
+            src="../assets/svgs/more.svg"></image>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- comments -->
+    <view class="comments">
+      <view class="comments-tabs">
+        <text class="comments-tabs-1">评论 {{ blog.commentNum ? blog.commentNum : '' }}</text>
+        <text class="comments-tabs-2">点赞 {{ blog.likeNum ? blog.likeNum : '' }}</text>
+      </view>
+      <view class="comments-list">
+        <view
+          class="comments-item"
+          wx:for="{{ blog.comments }}"
+          wx:for-item="comment"
+          wx:for-index="i"
+          wx:key="{{ i }}"
+          @tap.stop="showAction({{ comment.nickname }}, {{ comment.openid }}, {{ comment.isAdmin }}, {{ comment.isAuthor }}, {{ comment.cid }}, {{ i }})">
+          <view class="comment-user-info">
+            <image src="{{ comment.avatar }}" class="comment-user-avatar"></image>
+          </view>
+          <view class="comment-info">
+            <text class="comment-nickname">{{ comment.nickname }}</text>
+            <text class="comment-content">{{ comment.content }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- comment -->
+    <view class="comment">
+      <input
+        class="comment-input"
+        type="text"
+        placeholder="{{ placeholder }}"
+        bindinput="inputChange"
+        bindfocus="inputFocus"
+        bindblur="inputBlur"
+        bindconfirm="inputConfirm"
+        focus="{{ focusComment }}"
+        value="{{ inputContent }}"
+        confirm-type="send"
+        cursor-spacing="42"/>
+      <image
+        class="send-btn"
+        wx:if="{{ !disable }}"
+        @tap.stop="send"
+        src="../assets/svgs/send-fill.svg">
+      </image>
+      <view class="isanonymous" wx:if="{{ focusComment || !disable }}">
+        <view
+          class="isanonymous-btn {{ isAnonymous ? 'anonymous' : 'named' }}"
+          @tap.stop="anonymousChange">
+          <text class="anonymous-text">匿名</text>
+          <text class="named-text">实名</text>
+          <view class="isanonymous-btn-key"></view>
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>
 import wepy from 'wepy'
+import { api } from '../config'
+import http from '../utils/request'
+import sensitiveWordChecker from '../utils/sensitiveWordChecker'
 
 export default class Detail extends wepy.page {
   config = {
     navigationBarTitleText: '树洞正文'
   }
+
+  data = {
+    blog: {},
+    loading: true,
+    placeholder: '写点评论...',
+    focusComment: false,
+    disable: true,
+    comment: '',
+    isAnonymous: false,
+    replyTo: '',
+    inputContent: ''
+  }
+
+  methods = {
+    /**
+     * 查看大图
+     * @param {String} cur 当前展示图片
+     * @param {Array}  imageList 展示的图片列表
+     */
+    viewPic (cur, imageList) {
+      wepy.previewImage({
+        current: cur,
+        urls: imageList
+      })
+    },
+
+    /**
+     * 点赞
+     * @param {Number} idx 点赞树洞的索引
+     * @param {Number} id  点赞树洞的 id
+     */
+    async like () {
+      this.blog.like = !this.blog.like
+
+      if (this.blog.like) {
+        this.blog.likeNum++
+      } else {
+        this.blog.likeNum--
+      }
+
+      // apply change
+      this.$apply()
+
+      // commit request
+      try {
+        const res = await http({
+          url: api.blog.like.url,
+          method: api.blog.like.method,
+          data: {
+            bid: this.blog.id
+          }
+        })
+
+        if (res.statusCode === 400) {
+          this.blog.like = !this.blog.like
+
+          if (this.blog.like) {
+            this.blog.likeNum++
+          } else {
+            this.blog.likeNum--
+          }
+
+          this.$apply()
+        }
+      } catch (e) {
+        // roll back when request failed
+        console.log(e)
+
+        this.blog.like = !this.blog.like
+
+        if (this.blog.like) {
+          this.blog.likeNum++
+        } else {
+          this.blog.likeNum--
+        }
+
+        this.$apply()
+      }
+    },
+
+    /**
+     * 显示更多操作
+     * @param {Number} idx 点赞树洞的索引
+     * @param {Number} id  点赞树洞的 id
+    */
+    async showMore () {
+      try {
+        const { tapIndex } = await wepy.showActionSheet({
+          itemList: [
+            '删除'
+          ]
+        })
+
+        if (tapIndex === 0) {
+          await http({
+            url: api.blog.delete.url,
+            method: api.blog.delete.method,
+            data: {
+              bid: this.blog.id
+            }
+          })
+
+          await wepy.navigateBack({
+            delta: 1
+          })
+        }
+      } catch (e) {}
+    },
+
+    /**
+     * 显示地图
+     * @param {Float} latitude  纬度
+     * @param {Float} longitude 经度
+     */
+    showLocation (latitude, longitude) {
+      wepy.openLocation({
+        latitude,
+        longitude,
+        scale: 28
+      })
+    },
+
+    /**
+     * 显示操作列表
+     * @param {String}  nickname 操作对象的昵称
+     * @param {String}  openid   操作对象的 openid
+     * @param {Boolean} isAdmin  是否具有高级权限
+     * @param {Number}  id       操作对象的评论的 id
+     * @param {Number}  idx      操作对象的索引
+     */
+    async showAction (nickname, openid, isAdmin, isAuthor, id, idx) {
+      console.log(arguments)
+      const itemList = [`回复 ${nickname}:`]
+
+      if (isAdmin || isAuthor) {
+        itemList.push('删除评论')
+      }
+
+      try {
+        const { tapIndex } = await wepy.showActionSheet({
+          itemList
+        })
+
+        if (tapIndex === 0) {
+          this.methods.reply.call(this, nickname, openid)
+        } else if (tapIndex === 1) {
+          await this.methods.deleteComment.call(this, id, idx)
+        }
+      } catch (e) {}
+    },
+
+    /**
+     * 回复指定人
+     * @param {String} nickname 回复对象的昵称
+     * @param {String} openid   回复对象的 openid
+     */
+    reply (nickname, openid) {
+      this.inputContent = '回复 ' + nickname + '：'
+      this.focusComment = true
+      this.replyTo = openid
+      this.$apply()
+    },
+
+    /**
+     * 删除评论
+     * @param {Number} id  要删除对象的评论的 id
+     * @param {Number} idx 要删除对象的索引
+     */
+    async deleteComment (id, idx) {
+      try {
+        await http({
+          url: `${api.blog.deleteComment.url}/${id}`,
+          method: api.blog.deleteComment.method
+        })
+
+        this.blog.comments.slice(idx, 1)
+        this.$apply()
+      } catch (e) {
+        wepy.showModal({
+          title: '提示',
+          content: '删除评论失败。请重试或截图本提示，联系深大汪峰。' + e.message
+        })
+      }
+    },
+
+    /**
+     * 直接回复评论
+     */
+    comment () {
+      this.inputContent = ''
+      this.placeholder = '写点评论...'
+      this.focusComment = true
+      this.$apply()
+    },
+
+    /**
+     * 输入监听器
+     * 自动映射到 content
+     * @param {Event} e 输入事件
+     */
+    inputChange (e) {
+      this.comment = e.detail.value
+      this.disable = e.detail.value === ''
+    },
+
+    /**
+     * 输入框聚焦
+     */
+    inputFocus () {
+      this.focusComment = true
+      this.$apply()
+    },
+
+    /**
+     * 输入框失去焦点
+     */
+    inputBlur () {
+      this.focusComment = false
+      this.$apply()
+    },
+
+    async inputConfirm () {
+      await this.methods.send.call(this)
+    },
+
+    /**
+     * 切换实名、匿名
+     */
+    anonymousChange () {
+      this.isAnonymous = !this.isAnonymous
+      this.$apply()
+    },
+
+    /**
+     * 发送评论
+     */
+    async send () {
+      wepy.showToast({
+        title: '发送中...',
+        icon: 'loading',
+        duration: 10000,
+        mask: true
+      })
+
+      if (sensitiveWordChecker(this.comment)) {
+        wepy.hideToast()
+        wepy.showModal({
+          title: '提示',
+          content: '包含敏感词汇，发送失败：）'
+        })
+        return
+      }
+
+      const pack = {
+        bid: this.blog.id,
+        content: this.comment,
+        replyTo: this.replyTo,
+        isAnonymous: this.isAnonymous
+      }
+
+      try {
+        await http({
+          url: api.blog.comment.url,
+          method: api.blog.comment.method,
+          data: pack
+        })
+
+        // init input
+        this.inputContent = this.comment
+        this.$apply()
+        this.comment = ''
+        this.replyTo = ''
+        this.inputContent = ''
+        this.disable = true
+        this.focusComment = false
+        this.isAnonymous = false
+
+        // refetch data
+        await this.fetchDetail(this.blog.id)
+        this.$apply()
+
+        wepy.hideToast()
+      } catch (e) {
+        wepy.hideToast()
+        wepy.showModal({
+          title: '提示',
+          content: '发送评论失败。请重试或截图本提示，联系深大汪峰。' + e.message
+        })
+      }
+    }
+  }
+
+  async onLoad (options) {
+    await this.fetchDetail(options.id)
+    this.focusComment = !!options.focusComment
+    this.loading = false
+    this.$apply()
+  }
+
+  async onPullDownRefresh () {
+    await this.fetchDetail(this.blog.id)
+    wepy.stopPullDownRefresh()
+    this.$apply()
+  }
+
+  async fetchDetail (id) {
+    const raw = await http({
+      url: `${api.blog.detail.url}/${id}`,
+      method: api.blog.detail.method
+    })
+
+    this.blog = raw.data.data
+    this.$apply()
+  }
 }
 </script>
 
 <style lang="less">
+.page {
+  width: 100%;
+  padding-bottom: 60px;
+
+  .blog {
+    width: 100%;
+    padding: 15px;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+    background: #FFF;
+    overflow: hidden;
+
+    .blog-user {
+      width: 100%;
+      overflow: hidden;
+
+      .blog-user-avatar {
+        float: left;
+
+        .avatar {
+          width: 45px;
+          height: 45px;
+          border-radius: 3px;
+        }
+      }
+
+      .blog-user-info {
+        float: left;
+        padding-left: 10px;
+
+        .blog-user-nickname {
+          overflow: hidden;
+
+          .nickname {
+            float: left;
+            margin-top: 5px;
+            margin-right: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 20px;
+            color: #333;
+          }
+
+          .verify {
+            float: left;
+            width: 15px;
+            height: 15px;
+            margin-top: 6px;
+          }
+        }
+
+        .time-and-from {
+          width: 100%;
+          margin-top: 2px;
+          font-size: 12px;
+          color: #777;
+          display: block;
+        }
+      }
+    }
+
+    /* body */
+    .blog-item-body {
+      width: 100%;
+      margin-top: 10px;
+      box-sizing: border-box;
+      overflow: hidden;
+
+      .blog-item-body-content {
+        float: left;
+        width: 100%;
+        font-size: 16px;
+        line-height: 28px;
+        color: #333;
+        text-align: justify;
+      }
+
+      .blog-item-body-images {
+        float: left;
+        width: 100%;
+        margin-top: 10px;
+
+        .blog-item-body-image {
+          float: left;
+          width: 30%;
+          margin-right: 5px;
+          margin-top: 5px;
+          height: 110px;
+        }
+      }
+
+      .blog-item-location {
+        float: left;
+        margin-top: 10px;
+        width: 250px;
+        height: 24px;
+
+        .location-icon {
+          width: 24px;
+          height: 24px;
+          vertical-align: middle;
+        }
+
+        text {
+          font-size: 14px;
+          line-height: 24px;
+          font-weight: bold;
+          color: #FA6570;
+        }
+      }
+    }
+
+    .blog-item-operations {
+      width: 100%;
+      margin-top: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #EEE;
+      overflow: hidden;
+
+      .blog-item-operation-like,
+      .blog-item-operation-comment,
+      .blog-item-operation-more {
+        float: left;
+        width: 70px;
+        position: relative;
+        text-align: center;
+
+        .blog-item-operation-icon {
+          margin-right: 5px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .number {
+          position: absolute;
+          top: 5px;
+          left: 50%;
+          margin-left: 12px;
+          color: #999;
+          font-size: 14px;
+          line-height: 14px;
+          font-weight: bold;
+        }
+
+        .active {
+          color: #FA6570;
+        }
+      }
+
+      .blog-item-operation-like-scale {
+        animation: clickAnimation 300ms ease;
+      }
+
+      .blog-item-operation-more {
+        float: right;
+        text-align: center;
+      }
+    }
+  }
+
+  .comments {
+    margin-top: 10px;
+    width: 100%;
+    background: #FFF;
+    overflow: hidden;
+
+    .comments-tabs {
+      width: 100%;
+      height: 40px;
+      padding: 0 20px;
+      overflow: hidden;
+      
+      text {
+        color: #777;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 40px;
+      }
+      .comments-tabs-1 {
+        float: left;
+        color: #FA6570;
+      }
+      .comments-tabs-2 {
+        float: right;
+      }
+    }
+
+    .comments-list {
+      width: 100%;
+      padding: 0 10px;
+
+      .comments-item {
+        float: left;
+        width: 100%;
+        border-top: 1px solid #EEE;
+        background: #FFF;
+
+        .comment-user-info {
+          float: left;
+          width: 20%;
+          height: 60px;
+          text-align: center;
+
+          .comment-user-avatar {
+            width: 40px;
+            height: 40px;
+            margin: 10px 0;
+            border-radius: 50%;
+          }
+        }
+
+        .comment-info {
+          float: left;
+          width: 80%;
+          padding: 10px 10px 10px 0;
+
+          .comment-nickname {
+            color: #333;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 24px;
+            display: block;
+          }
+          .comment-content {
+            color: #666;
+            font-size: 13px;
+            line-height: 18px;
+            display: block;
+          }
+        }
+      }
+    }
+  }
+
+  .comment {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #FFF;
+    border-top: 1px solid #DDD;
+
+    .comment-input {
+      width: 100%;
+      padding-left: 15px;
+      padding-right: 60px;
+      height: 50px;
+      font-size: 15px;
+      color: #333;
+      line-height: 50px;
+      border-bottom: 1px solid #EEE;
+    }
+
+    .send-btn {
+      position: absolute;
+      top: 8px;
+      right: 15px;
+      width: 34px;
+      height: 34px;
+    }
+
+    .isanonymous {
+      background: #FFF;
+      padding: 5px;
+      overflow: hidden;
+
+      .isanonymous-btn {
+        position: relative;
+        float: left;
+        width: 66px;
+        height: 32px;
+        padding: 0 6px;
+        border-radius: 18px;
+        transition: all 300ms ease;
+
+        text {
+          color: #FFF;
+          font-size: 12px;
+          line-height: 32px;
+        }
+        .anonymous-text {
+          float: left;
+        }
+        .named-text {
+          float: right;
+        }
+
+        .isanonymous-btn-key {
+          position: absolute;
+          left: 1px;
+          top: 1px;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #FFF;
+          box-shadow: 0 2px 3px rgba(0,0,0,0.4);
+          transition: all 300ms ease;
+        }
+      }
+      .anonymous {
+        background: #FA6570;
+
+        .isanonymous-btn-key {
+          transform: translateX(34px);
+        }
+      }
+      .named {
+        background: #2ECC71;
+
+        .isanonymous-btn-key {
+          transform: translateX(0);
+        }
+      }
+    }
+  }
+}
+
+@keyframes clickAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 </style>

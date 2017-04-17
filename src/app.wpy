@@ -34,7 +34,8 @@ page {
 
 view,
 navigator,
-textarea {
+textarea,
+input {
   box-sizing: border-box;
 }
 

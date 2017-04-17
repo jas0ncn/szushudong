@@ -29,7 +29,7 @@
           <view class="list-user-nickname">
             <text class="nickname">{{ item.user.nickname }}</text>
             <image
-              wx:if="{{ item.user.isVerify }}"
+              wx:if="{{ item.user.isVerified }}"
               class="verify"
               src="../assets/svgs/person-v.svg">
             </image>
@@ -39,7 +39,7 @@
       </view>
       <!-- Blog Body -->
       <view class="list-item-body">
-        <text class="list-item-body-content" selectable="true">{{ item.text }}</text>
+        <text class="list-item-body-content">{{ item.text }}</text>
         <view class="list-item-body-images" wx:if="{{ item.images.length !== 0 }}">
           <image
             wx:for-item="image"
@@ -48,16 +48,16 @@
             wx:key="{{ i }}"
             @tap.stop="viewPic({{ image }}, {{ item.images }})"
             src="{{ image }}"
-            class="list-item-body-image" 
+            class="list-item-body-image"
             mode="aspectFill">
           </image>
         </view>
         <view
           class="list-item-location"
-          wx:if="{{ item.location !== '' && item.location !== undefined }}"
-          @tap.stop="showLocation({{ item.latitude }}, {{ item.longitude }})">
+          wx:if="{{ item.location.locationName }}"
+          @tap.stop="showLocation({{ item.location.latitude }}, {{ item.location.longitude }})">
           <image class="location-icon" src="../assets/svgs/location.svg"></image>
-          <text>{{ item.location }}</text>
+          <text>{{ item.location.locationName }}</text>
         </view>
       </view>
       <!-- Blog Operations -->
@@ -72,7 +72,7 @@
           <text class="number {{ item.like ? 'active' : '' }}" wx:if="{{ item.likeNum !== 0 }}">{{ item.likeNum }}</text>
         </view>
         <navigator
-          url="/pages/detail?id={{ item.id }}"
+          url="/pages/detail?id={{ item.id }}&focusComment=true"
           open-type="navigate"
           class="list-item-operation-comment">
           <image class="list-item-operation-icon" src="../assets/svgs/comment.svg"></image>
@@ -81,7 +81,7 @@
         <view
           @tap.stop="showMore({{ idx }}, {{ item.id }})"
           class="list-item-operation-more"
-          wx:if="{{ item.isAdmin }}">
+          wx:if="{{ item.user.isAdmin || item.user.isAuthor }}">
           <image
             class="list-item-operation-icon"
             src="../assets/svgs/more.svg"></image>
@@ -98,7 +98,8 @@ import { api } from '../config'
 
 export default class Clist extends wepy.component {
   props = {
-    list: Object
+    list: Object,
+    ads: Object
   }
 
   methods = {
@@ -235,6 +236,7 @@ export default class Clist extends wepy.component {
   }
 
   .list-item {
+    position: relative;
     width: 100%;
     padding: 15px;
     padding-bottom: 12px;
