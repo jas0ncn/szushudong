@@ -14,7 +14,7 @@ export default async function request (options) {
 
   if (response.statusCode === 401) {
     await interfaces.login()
-    return wepy.request(options)
+    return await request(options)
   } else if (response.statusCode === 500) {
     wepy.showModal({
       title: '提示',
