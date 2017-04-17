@@ -63,6 +63,10 @@ const api = {
       method: 'DELETE',
       url: '/v2/comments'
     }
+  },
+  ads: {
+    method: 'GET',
+    url: '/v2/ads'
   }
 }
 
