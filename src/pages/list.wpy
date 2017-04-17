@@ -1,5 +1,13 @@
 <template>
-  <clist :list.sync="list"></clist>
+  <view class="main-list">
+    <view class="ads" wx:if="{{ ads.length > 0 && showAd }}">
+      <image src="{{ ads[0].image }}" class="ad-image"></image>
+      <view class="close-btn" @tap="closeAd">
+        <image src="../assets/svgs/close-ad.svg"></image>
+      </view>
+    </view>
+    <clist :list.sync="list"></clist>
+  </view>
 </template>
 
 <script>
@@ -12,12 +20,21 @@ import http from '../utils/request'
 export default class List extends wepy.component {
   data = {
     list: [],
+    ads: [],
+    showAd: true,
     userinfo: store.state.userinfo,
     page: 1
   }
 
   components = {
     clist
+  }
+
+  methods = {
+    closeAd () {
+      this.showAd = false
+      this.$apply()
+    }
   }
 
   /**
@@ -28,6 +45,16 @@ export default class List extends wepy.component {
   }
 
   async onReload () {
+    await this.loadData()
+  }
+
+  async onPullDownRefresh () {
+    this.page = 1
+    await this.loadData()
+  }
+
+  async onReachBottom () {
+    this.page++
     await this.loadData()
   }
 
@@ -61,19 +88,55 @@ export default class List extends wepy.component {
         content: `加载列表失败，请截图本提示，并联系深大汪峰。${e.message}`
       })
     }
+
+    // load ads asynchronous
+    setTimeout(async () => {
+      await this.loadAds()
+    }, 0)
   }
 
-  async onPullDownRefresh () {
-    this.page = 1
-    await this.loadData()
-  }
+  async loadAds () {
+    try {
+      const raw = await http({
+        url: `${api.ads.url}/1`,
+        method: api.ads.method
+      })
 
-  async onReachBottom () {
-    this.page++
-    await this.loadData()
+      this.ads = raw.data.data
+      this.$apply()
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 </script>
 
 <style lang="less">
+.main-list {
+  width: 100%;
+
+  .ads {
+    position: relative;
+    width: 100%;
+
+    .ad-image {
+      width: 100%;
+      height: 70px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 23px;
+      right: 23px;
+      width: 24px;
+      height: 24px;
+      opacity: .5;
+
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+}
 </style>
