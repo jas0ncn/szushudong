@@ -1,5 +1,3 @@
-const disposeUrl = require('./utils/disposeUrl')
-
 // ENV
 const env = 'production' // 'development' or 'production'
 
@@ -73,4 +71,16 @@ const api = {
 module.exports = {
   env,
   api: disposeUrl(api, hosts[env])
+}
+
+function disposeUrl (obj, prefix) {
+  Object.keys(obj).forEach(v => {
+    if (obj[v].url) {
+      obj[v].url = prefix + obj[v].url
+    } else {
+      obj[v] = disposeUrl(obj[v], prefix)
+    }
+  })
+
+  return obj
 }
