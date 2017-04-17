@@ -256,6 +256,9 @@ export default class NewBlog extends wepy.page {
         mask: true
       })
 
+      // save status
+      wepy.setStorageSync('isNeedReloadList', 'true')
+
       await wepy.navigateBack({
         delta: 1
       })

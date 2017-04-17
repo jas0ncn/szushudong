@@ -70,6 +70,15 @@ export default class Index extends wepy.page {
     }
   }
 
+  onShow () {
+    const isNeedReloadList = wepy.getStorageSync('isNeedReloadList')
+    if (isNeedReloadList === 'true') {
+      // call list onShow in first load
+      this.$invoke('list', 'onComponentLoad')
+      wepy.setStorageSync('isNeedReloadList', 'false')
+    }
+  }
+
   onPullDownRefresh () {
     this.$invoke(this.tabs[this.tab], 'onPullDownRefresh')
   }
@@ -90,6 +99,14 @@ export default class Index extends wepy.page {
 
     // call list onShow in first load
     this.$invoke('list', 'onComponentLoad')
+  }
+
+  onShareAppMessage () {
+    return {
+      title: '深大树洞',
+      desc: '深大树洞首页~快来匿名发表树洞啊~',
+      path: '/pages/index'
+    }
   }
 }
 </script>
