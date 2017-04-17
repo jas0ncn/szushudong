@@ -14,12 +14,12 @@
     <view class="tab" @tap="switchTapTo(0)">
       <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 0 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
-      <span class="badge" wx:if="{{ unreadList !== 0 }}"></span>
+      <view class="badge" wx:if="{{ unreadList !== 0 }}"></view>
     </view>
     <view class="tab" @tap="switchTapTo(1)">
       <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 1 }}"></image>
       <image src="../assets/svgs/message.svg"      wx:else></image>
-      <span class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</span>
+      <view class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</view>
     </view>
     <view class="tab" @tap="switchTapTo(2)">
       <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 2 }}"></image>
