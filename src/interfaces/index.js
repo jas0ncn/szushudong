@@ -3,22 +3,18 @@ import store from '../store'
 import { api } from '../config'
 
 export default {
-  getUserInfo () {
-    return new Promise((resolve, reject) => {
-      wepy.login().then((r) => {
-        wepy.getUserInfo().then((res) => {
-          res.code = r.code
+  async getUserInfo () {
+    const loginData = await wepy.login()
+    const userinfo = await wepy.getUserInfo()
+    userinfo.code = loginData.code
 
-          // store user info
-          store.mutate(state => {
-            state.userinfo = res.userInfo
-            return state
-          })
-
-          resolve(res)
-        }).catch(reject)
-      }).catch(reject)
+    // store user info
+    store.mutate(state => {
+      state.userinfo = userinfo
+      return state
     })
+
+    return userinfo
   },
   async login () {
     let userinfoRaw = {}
