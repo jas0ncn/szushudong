@@ -1,13 +1,217 @@
 <template>
-  <text>message page</text>
+  <scroll-view
+    scroll-y="true"
+    bindscrolltolower="loadNextPage"
+    enable-back-to-top="true"
+    class="list">
+    <view class="operations">
+      <view class="operation markAllRead" @tap.stop="markAllRead()">
+        <image src="../assets/svgs/markAllRead.svg"></image>
+        <text>全部标为已读</text>
+      </view>
+      <view class="operation refresh" @tap.stop="refresh()">
+        <image src="../assets/svgs/refresh.svg"></image>
+        <text>刷新</text>
+      </view>
+    </view>
+    <view
+      wx:for="{{ list }}"
+      wx:for-item="item"
+      wx:key="{{ idx }}"
+      wx:for-index="idx"
+      @tap.stop="jumpTo({{ item.bid }}, {{ item.nid }})"
+      class="item {{ item.isUnread ? 'unread' : 'read' }}">
+      <view class="avatar">
+        <image src="{{ item.user.avatar }}" class="avatar-image"></image>
+      </view>
+      <view class="content">
+        <view class="userinfo">
+          <text class="nickname">{{ item.user.nickname }}</text>
+          <text class="time"> {{ item.time }}</text>
+        </view>
+        <text class="message-content">{{ item.content }}</text>
+      </view>
+    </view>
+  </scroll-view>
 </template>
 
 <script>
 import wepy from 'wepy'
+import { api } from '../config'
+import http from '../utils/request'
 
 export default class Message extends wepy.component {
+  data = {
+    list: [],
+    page: 1
+  }
+
+  async onShow () {
+    this.page = 1
+    await this.reloadList()
+  }
+
+  async reloadList () {
+    try {
+      const messages = await http({
+        url: `${api.notifications.messages.url}?page=${this.page}`,
+        method: api.notifications.messages.method
+      })
+
+      this.list = messages.data.data.unreadMessages
+      this.$apply()
+    } catch (e) {
+      wepy.showModal({
+        title: '提示',
+        content: `获取消息失败，请截图本提示，并联系深大汪峰。${e.message}`
+      })
+    }
+  }
+
+  async loadNextPage () {
+    this.page++
+    await this.reloadList()
+  }
+
+  methods = {
+    /**
+     * 跳转到树洞并设置为已读
+     * @param {Number} bid blog id
+     * @param {Number} nid notification id
+     */
+    jumpTo (bid, nid) {
+      http({
+        url: `${api.notifications.read.url}/${nid}`,
+        method: api.notifications.read.method
+      })
+
+      wepy.navigateTo({
+        url: `/pages/detail?id=${bid}`
+      })
+    },
+
+    /**
+     * 全部标记为已读
+     */
+    async markAllRead () {
+      http({
+        url: api.notifications.read.url,
+        method: api.notifications.read.method
+      })
+
+      this.page = 1
+      await this.reloadList()
+    },
+
+    /**
+     * 刷新列表
+     */
+    async refresh () {
+      this.page = 1
+      await this.reloadList()
+    }
+  }
 }
 </script>
 
 <style lang="less">
+.list {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  .operations {
+    float: left;
+    width: 100%;
+    background: #FFF;
+    margin-bottom: 1px;
+    overflow: hidden;
+
+    .operation {
+      float: left;
+      padding: 10px;
+
+      image {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        vertical-align: middle;
+      }
+
+      text {
+        color: #555;
+        font-size: 14px;
+        line-height: 20px;
+      }
+    }
+
+    .markAllRead {
+      width: 60%;
+    }
+
+    .refresh {
+      width: 40%;
+      text-align: right;
+    }
+  }
+
+  .item {
+    float: left;
+    width: 100%;
+    margin-bottom: 1px;
+    background: #FFF;
+    overflow: hidden;
+
+    .avatar {
+      float: left;
+      width: 20%;
+      padding: 10px;
+      text-align: center;
+
+      .avatar-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+    }
+
+    .content {
+      float: left;
+      width: 80%;
+      padding: 10px;
+      padding-left: 0;
+
+      .userinfo {
+        float: left;
+        width: 100%;
+
+        .nickname {
+          color: #333;
+          font-weight: bold;
+          font-size: 16px;
+          line-height: 30px;
+        }
+
+        .time {
+          margin-left: 10px;
+          color: #777;
+          font-size: 12px;
+        }
+      }
+
+      .message-content {
+        float: left;
+        width: 100%;
+        color: #222;
+        font-size: 14px;
+        line-height: 26px;
+      }
+    }
+  }
+
+  .read {
+    opacity: .6;
+  }
+}
 </style>
