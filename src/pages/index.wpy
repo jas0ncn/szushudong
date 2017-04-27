@@ -3,10 +3,10 @@
     <view class="page page-list {{ tab === 0 ? 'visible' : 'hide' }}">
       <list></list>
     </view>
-    <view class="page" wx:if="{{ tab === 1 }}">
+    <view class="page {{ tab === 1 ? 'visible' : 'hide' }}">
       <message></message>
     </view>
-    <view class="page" wx:if="{{ tab === 2 }}">
+    <view class="page {{ tab === 2 ? 'visible' : 'hide' }}">
       <user></user>
     </view>
   </view>
@@ -14,12 +14,11 @@
     <view class="tab" @tap="switchTapTo(0)">
       <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 0 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
-      <view class="badge" wx:if="{{ unreadList !== 0 }}"></view>
     </view>
     <view class="tab" @tap="switchTapTo(1)">
       <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 1 }}"></image>
       <image src="../assets/svgs/message.svg"      wx:else></image>
-      <view class="badge badge-number" wx:if="{{ unreadMessages !== 0 }}">{{ unreadMessages }}</view>
+      <view class="badge badge-number" wx:if="{{ unreadMessagesCount !== 0 }}">{{ unreadMessagesCount }}</view>
     </view>
     <view class="tab" @tap="switchTapTo(2)">
       <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 2 }}"></image>
@@ -32,6 +31,8 @@
 import wepy from 'wepy'
 import store from '../store'
 import interfaces from '../interfaces'
+import { api } from '../config'
+import http from '../utils/request'
 
 // tabs
 import list from './list'
@@ -51,8 +52,7 @@ export default class Index extends wepy.page {
 
   data = {
     tab: 0,
-    unreadList: 0,
-    unreadMessages: 1,
+    unreadMessagesCount: 0,
     userinfo: store.state.userinfo,
     tabs: ['list', 'message', 'user']
   }
@@ -60,6 +60,12 @@ export default class Index extends wepy.page {
   methods = {
     switchTapTo (tabIndex) {
       tabIndex = parseInt(tabIndex)
+
+      // 清空消息提醒
+      if (tabIndex === 1) {
+        this.unreadMessagesCount = 0
+        this.$apply()
+      }
 
       if (this.tab === tabIndex) {
         this.$invoke(this.tabs[tabIndex], 'onReload')
@@ -76,6 +82,10 @@ export default class Index extends wepy.page {
       // call list onShow in first load
       this.$invoke('list', 'onComponentLoad')
       wepy.setStorageSync('isNeedReloadList', 'false')
+    }
+
+    if (this.tab === 1) {
+      this.$invoke('message', 'onShow')
     }
   }
 
@@ -99,6 +109,24 @@ export default class Index extends wepy.page {
 
     // call list onShow in first load
     this.$invoke('list', 'onComponentLoad')
+
+    setTimeout(async () => {
+      await this.loadNotifications()
+    }, 0)
+
+    setInterval(async () => {
+      await this.loadNotifications()
+    }, 10 * 1000)
+  }
+
+  async loadNotifications () {
+    const notifications = await http({
+      url: api.notifications.count.url,
+      method: api.notifications.count.method
+    })
+
+    this.unreadMessagesCount = notifications.data.data.unreadMessagesCount
+    this.$apply()
   }
 
   onShareAppMessage () {

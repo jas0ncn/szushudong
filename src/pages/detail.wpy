@@ -702,12 +702,13 @@ export default class Detail extends wepy.page {
 
     .comment-input {
       width: 100%;
-      padding-left: 15px;
+      padding: 15px;
       padding-right: 60px;
-      height: 50px;
+      min-height: 50px;
+      max-height: 100px;
       font-size: 15px;
       color: #333;
-      line-height: 50px;
+      line-height: 20px;
       border-bottom: 1px solid #EEE;
     }
 
