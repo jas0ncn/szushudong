@@ -1,5 +1,5 @@
 // ENV
-const env = 'production' // 'development' or 'production'
+const env = 'development' // 'development' or 'production'
 
 // development and production host
 const hosts = {
@@ -60,6 +60,20 @@ const api = {
     deleteComment: {
       method: 'DELETE',
       url: '/v2/comments'
+    }
+  },
+  notifications: {
+    count: {
+      method: 'GET',
+      url: '/v2/notifications'
+    },
+    messages: {
+      method: 'GET',
+      url: '/v2/notifications/messages'
+    },
+    read: {
+      method: 'PATCH',
+      url: '/v2/notifications'
     }
   },
   ads: {
