@@ -42,10 +42,18 @@ export default class List extends wepy.component {
    */
   async onComponentLoad () {
     await this.loadData()
+    this.$apply()
+
+    // load ads asynchronous
+    setTimeout(async () => {
+      await this.loadAds()
+    }, 0)
   }
 
   async onReload () {
+    this.page = 1
     await this.loadData()
+    this.$apply()
   }
 
   async onPullDownRefresh () {
@@ -59,6 +67,7 @@ export default class List extends wepy.component {
   }
 
   onShow () {
+    console.log('show index')
   }
 
   /**
@@ -88,11 +97,6 @@ export default class List extends wepy.component {
         content: `加载列表失败，请截图本提示，并联系深大汪峰。${e.message}`
       })
     }
-
-    // load ads asynchronous
-    setTimeout(async () => {
-      await this.loadAds()
-    }, 0)
   }
 
   async loadAds () {
