@@ -1,7 +1,7 @@
 <template>
-  <view class="page" wx:if="{{ !loading }}">
+  <view class="page">
     <!-- blog content -->
-    <view class="blog">
+    <view class="blog" wx:if="{{ !loading }}">
       <!-- User Info -->
       <view class="blog-user">
         <view class="blog-user-avatar">
@@ -73,7 +73,7 @@
     </view>
 
     <!-- comments -->
-    <view class="comments">
+    <view class="comments" wx:if="{{ !loading }}">
       <view class="comments-tabs">
         <text class="comments-tabs-1">评论 {{ blog.commentNum ? blog.commentNum : '' }}</text>
         <text class="comments-tabs-2">点赞 {{ blog.likeNum ? blog.likeNum : '' }}</text>
@@ -98,7 +98,7 @@
     </view>
 
     <!-- comment -->
-    <view class="comment">
+    <view class="comment" wx:if="{{ !loading }}">
       <input
         class="comment-input"
         type="text"
@@ -433,9 +433,10 @@ export default class Detail extends wepy.page {
   }
 
   async onLoad (options) {
+    this.loading = true
+    this.$apply()
     await this.fetchDetail(options.id)
     this.focusComment = !!options.focusComment
-    this.loading = false
     this.$apply()
   }
 
@@ -451,8 +452,25 @@ export default class Detail extends wepy.page {
       method: api.blog.detail.method
     })
 
-    this.blog = raw.data.data
-    this.$apply()
+    if (raw.statusCode === 404) {
+      await wepy.showToast({
+        title: '树洞不存在',
+        icon: 'loading',
+        image: '../assets/svgs/warn.svg',
+        duration: 1500,
+        mask: true
+      })
+
+      setTimeout(async () => {
+        await wepy.navigateBack({
+          delta: 1
+        })
+      }, 1500)
+    } else {
+      this.loading = false
+      this.blog = raw.data.data
+      this.$apply()
+    }
   }
 }
 </script>
