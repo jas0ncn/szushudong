@@ -18,7 +18,7 @@
 import wepy from 'wepy'
 import clist from '../components/clist'
 import store from '../store'
-import { api } from '../config'
+import { api, version } from '../config'
 import http from '../utils/request'
 
 export default class List extends wepy.component {
@@ -108,7 +108,8 @@ export default class List extends wepy.component {
         url: api.blog.list.url,
         method: api.blog.list.method,
         data: {
-          page: this.page
+          page: this.page,
+          version
         }
       })
 

@@ -1,5 +1,8 @@
 // ENV
-const env = 'development' // 'development' or 'production'
+const env = 'production' // 'development' or 'production'
+
+// WXAPP VERSION
+const version = 2.0
 
 // development and production host
 const hosts = {
@@ -76,18 +79,23 @@ const api = {
       url: '/v2/notifications/messages'
     },
     read: {
-      method: 'PATCH',
+      method: 'PUT',
       url: '/v2/notifications'
     }
   },
   ads: {
     method: 'GET',
     url: '/v2/ads'
+  },
+  configs: {
+    method: 'GET',
+    url: '/v2/configs'
   }
 }
 
 module.exports = {
   env,
+  version,
   api: disposeUrl(api, hosts[env])
 }
 

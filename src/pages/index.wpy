@@ -10,7 +10,7 @@
       <user></user>
     </view>
   </view>
-  <view class="tabs">
+  <view class="tabs" wx:if="{{ showTabs }}">
     <view class="tab" @tap="switchTapTo(0)">
       <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 0 }}"></image>
       <image src="../assets/svgs/home.svg"      wx:else></image>
@@ -31,7 +31,7 @@
 import wepy from 'wepy'
 import store from '../store'
 import interfaces from '../interfaces'
-import { api } from '../config'
+import { api, version } from '../config'
 import http from '../utils/request'
 
 // tabs
@@ -54,7 +54,8 @@ export default class Index extends wepy.page {
     tab: 0,
     unreadMessagesCount: 0,
     userinfo: store.state.userinfo,
-    tabs: ['list', 'message', 'user']
+    tabs: ['list', 'message', 'user'],
+    showTabs: false
   }
 
   methods = {
@@ -98,6 +99,21 @@ export default class Index extends wepy.page {
   }
 
   async onLoad () {
+    const isInTest = wepy.getStorageSync(`isInTest-${version}`)
+    if (isInTest === 'false') {
+      this.showTabs = true
+    } else {
+      const { data } = await http({
+        url: api.configs.url,
+        method: api.configs.method
+      })
+
+      if (data.data.isTest === false) {
+        this.showTabs = true
+        wepy.setStorageSync(`isInTest-${version}`, 'false')
+      }
+    }
+
     try {
       await interfaces.login()
     } catch (e) {
