@@ -1,7 +1,11 @@
 <template>
   <view class="main-list">
     <view class="ads" wx:if="{{ ads.length > 0 && showAd }}">
-      <image src="{{ ads[0].image }}" class="ad-image"></image>
+      <navigator
+        url="/pages/detail?id={{ ad.bid }}"
+        open-type="navigate">
+        <image src="{{ ad.image }}" class="ad-image"></image>
+      </navigator>
       <view class="close-btn" @tap="closeAd">
         <image src="../assets/svgs/close-ad.svg"></image>
       </view>
@@ -21,6 +25,7 @@ export default class List extends wepy.component {
   data = {
     list: [],
     ads: [],
+    ad: {},
     showAd: true,
     userinfo: store.state.userinfo,
     page: 1
@@ -47,6 +52,30 @@ export default class List extends wepy.component {
     // load ads asynchronous
     setTimeout(async () => {
       await this.loadAds()
+
+      if (this.ads.length > 0 && this.showAd) {
+        let idx = 0
+        this.ad = this.ads[idx]
+        this.$apply()
+
+        // shuffling when ad count more than 1
+        if (this.ads.length > 1) {
+          let adTimer = setInterval(() => {
+            if (!this.showAd) {
+              clearInterval(adTimer)
+            }
+
+            if (idx < this.ads.length - 1) {
+              idx++
+            } else {
+              idx = 0
+            }
+
+            this.ad = this.ads[idx]
+            this.$apply()
+          }, 5000)
+        }
+      }
     }, 0)
   }
 
