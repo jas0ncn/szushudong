@@ -172,16 +172,27 @@ export default class Clist extends wepy.component {
         })
 
         if (tapIndex === 0) {
-          this.list.splice(idx, 1)
-          this.$apply()
-
-          await http({
-            url: api.blog.delete.url,
-            method: api.blog.delete.method,
-            data: {
-              bid: id
-            }
+          const status = await wepy.showModal({
+            title: '删除',
+            content: '确定要删除这条树洞？',
+            cancelText: '不删了',
+            cancelColor: '#666666',
+            confirmText: '删除吧',
+            confirmColor: '#3CC51F'
           })
+
+          if (status.confirm) {
+            this.list.splice(idx, 1)
+            this.$apply()
+
+            await http({
+              url: api.blog.delete.url,
+              method: api.blog.delete.method,
+              data: {
+                bid: id
+              }
+            })
+          }
         }
       } catch (e) {
         console.log('User cancel')

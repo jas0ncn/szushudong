@@ -309,19 +309,29 @@ export default class Detail extends wepy.page {
      * @param {Number} idx 要删除对象的索引
      */
     async deleteComment (id, idx) {
-      try {
-        await http({
-          url: `${api.blog.deleteComment.url}/${id}`,
-          method: api.blog.deleteComment.method
-        })
+      const status = await wepy.showModal({
+        title: '删除',
+        content: '确定要删除这条评论？',
+        cancelText: '不删了',
+        cancelColor: '#666666',
+        confirmText: '删除吧',
+        confirmColor: '#3CC51F'
+      })
 
-        this.blog.comments.slice(idx, 1)
-        this.$apply()
-      } catch (e) {
-        wepy.showModal({
-          title: '提示',
-          content: '删除评论失败。请重试或截图本提示，联系深大汪峰。' + e.message
-        })
+      if (status.confirm) {
+        try {
+          await http({
+            url: `${api.blog.deleteComment.url}/${id}`,
+            method: api.blog.deleteComment.method
+          })
+
+          await this.fetchDetail(this.blog.id)
+        } catch (e) {
+          wepy.showModal({
+            title: '提示',
+            content: '删除评论失败。请重试或截图本提示，联系深大汪峰。' + e.message
+          })
+        }
       }
     },
 
