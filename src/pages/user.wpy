@@ -1,13 +1,202 @@
 <template>
-  <text>user page</text>
+  <scroll-view
+    scroll-y="true"
+    bindscrolltolower="loadNext"
+    enable-back-to-top="true"
+    class="user">
+    <view class="userinfo">
+      <view class="avatar">
+        <image src="{{ userinfo.avatarUrl }}" class="avatar-image"></image>
+      </view>
+      <view class="nickname">
+        <text>{{ userinfo.nickName }}</text>
+      </view>
+    </view>
+    <view class="blogs">
+      <navigator
+        wx:for="{{ blogs }}"
+        wx:for-item="item"
+        wx:key="{{ idx }}"
+        wx:for-index="idx"
+        url="/pages/detail?id={{ item.id }}"
+        open-type="navigate"
+        class="item-body">
+        <text class="item-body-content">{{ item.content }}</text>
+        <view class="item-body-images" wx:if="{{ item.images.length !== 0 }}">
+          <image
+            wx:for-item="image"
+            wx:for="{{ item.images }}"
+            wx:for-index="i"
+            wx:key="{{ i }}"
+            @tap.stop="viewPic({{ image }}, {{ item.images }})"
+            src="{{ image }}"
+            class="item-body-image"
+            mode="aspectFill">
+          </image>
+        </view>
+        <view
+          class="item-location"
+          wx:if="{{ item.location }}"
+          @tap.stop="showLocation({{ item.latitude }}, {{ item.longitude }})">
+          <image class="location-icon" src="../assets/svgs/location.svg"></image>
+          <text>{{ item.location }}</text>
+        </view>
+      </navigator>
+    </view>
+  </scroll-view>
 </template>
 
 <script>
 import wepy from 'wepy'
+import { api } from '../config'
+import http from '../utils/request'
 
 export default class User extends wepy.component {
+  data = {
+    userinfo: {},
+    blogs: [],
+    page: 1
+  }
+
+  async onShow () {
+    try {
+      const { userInfo } = await wepy.getUserInfo()
+      this.userinfo = userInfo
+
+      const { data } = await http({
+        method: api.user.blog.method,
+        url: `${api.user.blog.url}?page=1`
+      })
+      this.blogs = data.data
+
+      this.$apply()
+    } catch (e) {
+      wepy.showModal({
+        title: '提示',
+        content: `加载页面出错，请截图本提示，并联系深大汪峰。${e.message}`
+      })
+    }
+  }
+
+  methods = {
+    async loadNext () {
+      try {
+        const { data } = await http({
+          method: api.user.blog.method,
+          url: `${api.user.blog.url}?page=${this.page + 1}`
+        })
+
+        if (data.data.length !== 0) {
+          this.page++
+
+          this.blogs.push(...data.data)
+          this.$apply()
+        }
+      } catch (e) {
+        wepy.showModal({
+          title: '提示',
+          content: `加载数据出错，请截图本提示，并联系深大汪峰。${e.message}`
+        })
+      }
+    }
+  }
 }
 </script>
 
 <style lang="less">
+.user {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  .userinfo {
+    float: left;
+    width: 100%;
+    height: 170px;
+    padding: 30px 10px;
+    background: #FA6570;
+
+    .avatar {
+      float: left;
+      width: 100%;
+      text-align: center;
+
+      .avatar-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+      }
+    }
+
+    .nickname {
+      float: left;
+      width: 100%;
+      text-align: center;
+
+      text {
+        color: #FFF;
+        font-size: 20px;
+        line-height: 40px;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .blogs {
+    float: left;
+    width: 100%;
+    
+    .item-body {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 15px;
+      background: #FFF;
+      box-sizing: border-box;
+      overflow: hidden;
+
+      .item-body-content {
+        float: left;
+        width: 100%;
+        font-size: 16px;
+        line-height: 28px;
+        color: #333;
+        text-align: justify;
+      }
+
+      .item-body-images {
+        float: left;
+        width: 100%;
+        margin-top: 10px;
+
+        .item-body-image {
+          float: left;
+          width: 30%;
+          margin-right: 5px;
+          margin-top: 5px;
+          height: 110px;
+        }
+      }
+
+      .item-location {
+        float: left;
+        margin-top: 10px;
+        width: 250px;
+        height: 24px;
+
+        .location-icon {
+          width: 24px;
+          height: 24px;
+          vertical-align: middle;
+        }
+
+        text {
+          font-size: 14px;
+          line-height: 24px;
+          font-weight: bold;
+          color: #FA6570;
+        }
+      }
+    }
+  }
+}
 </style>

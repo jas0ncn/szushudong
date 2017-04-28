@@ -26,6 +26,10 @@ const api = {
     info: {
       method: 'GET',
       url: '/user/info'
+    },
+    blog: {
+      method: 'GET',
+      url: '/v2/user'
     }
   },
   blog: {
