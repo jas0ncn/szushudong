@@ -68,11 +68,6 @@ export default class Message extends wepy.component {
     }
   }
 
-  async loadNextPage () {
-    this.page++
-    await this.reloadList()
-  }
-
   methods = {
     /**
      * 跳转到树洞并设置为已读
@@ -109,6 +104,29 @@ export default class Message extends wepy.component {
     async refresh () {
       this.page = 1
       await this.reloadList()
+    },
+
+    /**
+     * 加载下一页
+     */
+    async loadNextPage () {
+      try {
+        const messages = await http({
+          url: `${api.notifications.messages.url}?page=${this.page + 1}`,
+          method: api.notifications.messages.method
+        })
+
+        if (messages.data.data.unreadMessages.length !== 0) {
+          this.page++
+          this.list.push(...messages.data.data.unreadMessages)
+          this.$apply()
+        }
+      } catch (e) {
+        wepy.showModal({
+          title: '提示',
+          content: `获取消息失败，请截图本提示，并联系深大汪峰。${e.message}`
+        })
+      }
     }
   }
 }
