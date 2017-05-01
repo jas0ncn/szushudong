@@ -1,8 +1,10 @@
 # 深大的树洞 2.0
 
-深大的树洞 2.0 开源仓库
+本仓库是深大的树洞微信小程序对应的开源仓库，旨在分享微信小程序的开发经验。
 
 本仓库依赖于 [Wepy](https://github.com/wepyjs/wepy) 框架，感谢 Wepy 作者的努力。
+
+同时，请注意本仓库的开源协议为 GPL，这意味着你拥有运行、复制、修改、发行和传播该软件的自由，但是你修改后的软件本身也受 GPL 约束，你必须开放源代码。
 
 ## 开发环境运行
 
@@ -40,6 +42,13 @@ wepy build --watch
 1. 打开 `Preferences`，搜索 `Plugins`，搜索 `Vue.js` 插件并安装。
 2. 打开 `Preferences`，搜索 `File Types`，找到 `Vue.js Template`，在 `Registered Patterns` 添加 `*.wpy`，即可高亮。
 
-## 其他问题
+## 问题
 
-请查看 [Wepy 官方文档](https://wepyjs.github.io/wepy/#/)，或提 Issue。
+对于小程序的 API 使用问题请查看[微信官方小程序文档](https://mp.weixin.qq.com/debug/wxadoc/dev/)和 [Wepy 官方文档](https://wepyjs.github.io/wepy/#/)。
+
+如果是对于树洞本身的一些 BUGs 或问题，请提 [issue](https://github.com/jas0ncn/szushudong/issues)。
+
+## 开源协议
+查看 [LICENSE](https://github.com/jas0ncn/szushudong/blob/master/LICENSE)
+
+Copyright (c) 2016-present, Junyi (Jason) Chen
