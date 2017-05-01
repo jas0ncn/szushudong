@@ -1,5 +1,5 @@
 {
-  "name": "shudong2",
+  "name": "szushudong",
   "version": "2.0.1",
   "description": "深大的树洞 2.0",
   "main": "dist/app.js",
@@ -7,6 +7,17 @@
     "dev": "wepy build --watch",
     "build": "cross-env NODE_ENV=production wepy build --no-cache"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jas0ncn/szushudong.git"
+  },
+  "keywords": [
+    "shudong"
+  ],
+  "bugs": {
+    "url": "https://github.com/jas0ncn/szushudong/issues"
+  },
+  "homepage": "https://github.com/jas0ncn/szushudong#readme",
   "author": "Jason",
   "license": "GPL",
   "dependencies": {
