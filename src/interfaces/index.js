@@ -1,5 +1,4 @@
 import wepy from 'wepy'
-import store from '../store'
 import { api } from '../config'
 
 const interfaces = {
@@ -7,13 +6,6 @@ const interfaces = {
     const loginData = await wepy.login()
     const userinfo = await wepy.getUserInfo()
     userinfo.code = loginData.code
-
-    // store user info
-    store.mutate(state => {
-      state.userinfo = userinfo
-      return state
-    })
-
     return userinfo
   },
   async login () {
