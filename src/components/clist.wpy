@@ -61,7 +61,7 @@
         </view>
       </view>
       <!-- Blog Operations -->
-      <view class="list-item-operations">
+      <view class="list-item-operations" wx:if="{{ !isTest }}">
         <view
           @tap.stop="like({{ idx }}, {{ item.id }})"
           hover-class="list-item-operation-like-scale"
@@ -94,12 +94,16 @@
 <script>
 import wepy from 'wepy'
 import http from '../utils/request'
-import { api } from '../config'
+import { api, version } from '../config'
 
 export default class Clist extends wepy.component {
   props = {
     list: Object,
     ads: Object
+  }
+
+  data = {
+    isTest: true
   }
 
   methods = {
@@ -211,6 +215,11 @@ export default class Clist extends wepy.component {
         scale: 28
       })
     }
+  }
+
+  onComponentLoad () {
+    this.isTest = !Boolean(wepy.getStorageSync(`isInTest-${version}`))
+    this.$apply()
   }
 }
 </script>

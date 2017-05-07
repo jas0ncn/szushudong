@@ -46,7 +46,7 @@
         </view>
       </view>
       <!-- Blog Operations -->
-      <view class="blog-item-operations">
+      <view class="blog-item-operations" wx:if="{{ !isTest }}">
         <view
           @tap.stop="like()"
           hover-class="blog-item-operation-like-scale"
@@ -73,7 +73,7 @@
     </view>
 
     <!-- comments -->
-    <view class="comments" wx:if="{{ !loading }}">
+    <view class="comments" wx:if="{{ !loading && !isTest }}">
       <view class="comments-tabs">
         <text class="comments-tabs-1">评论 {{ blog.commentNum ? blog.commentNum : '' }}</text>
         <text class="comments-tabs-2">点赞 {{ blog.likeNum ? blog.likeNum : '' }}</text>
@@ -132,7 +132,7 @@
 
 <script>
 import wepy from 'wepy'
-import { api } from '../config'
+import { api, version } from '../config'
 import http from '../utils/request'
 import sensitiveWordChecker from '../utils/sensitiveWordChecker'
 
@@ -150,7 +150,8 @@ export default class Detail extends wepy.page {
     comment: '',
     isAnonymous: false,
     replyTo: '',
-    inputContent: ''
+    inputContent: '',
+    isTest: true
   }
 
   methods = {
@@ -445,8 +446,10 @@ export default class Detail extends wepy.page {
   async onLoad (options) {
     this.loading = true
     this.$apply()
+
     await this.fetchDetail(options.id)
     this.focusComment = !!options.focusComment
+    this.isTest = !Boolean(wepy.getStorageSync(`isInTest-${version}`))
     this.$apply()
   }
 

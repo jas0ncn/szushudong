@@ -49,6 +49,9 @@ export default class List extends wepy.component {
     await this.loadData()
     this.$apply()
 
+    // call component's lifecycle
+    this.$invoke('clist', 'onComponentLoad')
+
     // load ads asynchronous
     setTimeout(async () => {
       await this.loadAds()
