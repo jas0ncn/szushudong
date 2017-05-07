@@ -2,7 +2,6 @@
   <scroll-view
     scroll-y="true"
     bindscrolltolower="loadNext"
-    enable-back-to-top="true"
     class="user">
     <view class="userinfo">
       <view class="avatar">

@@ -2,7 +2,6 @@
   <scroll-view
     scroll-y="true"
     bindscrolltolower="loadNextPage"
-    enable-back-to-top="true"
     class="list">
     <view class="operations">
       <view class="operation markAllRead" @tap.stop="markAllRead()">
