@@ -1,28 +1,30 @@
 <template>
-  <view class="container">
-    <view class="page page-list {{ tab === 0 ? 'visible' : 'hide' }}">
-      <list></list>
+  <view>
+    <view class="container">
+      <view class="page page-list {{ tab === 0 ? 'visible' : 'hide' }}">
+        <list></list>
+      </view>
+      <view class="page {{ tab === 1 ? 'visible' : 'hide' }}">
+        <message></message>
+      </view>
+      <view class="page {{ tab === 2 ? 'visible' : 'hide' }}">
+        <user></user>
+      </view>
     </view>
-    <view class="page {{ tab === 1 ? 'visible' : 'hide' }}">
-      <message></message>
-    </view>
-    <view class="page {{ tab === 2 ? 'visible' : 'hide' }}">
-      <user></user>
-    </view>
-  </view>
-  <view class="tabs" wx:if="{{ showTabs }}">
-    <view class="tab" @tap="switchTapTo(0)">
-      <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 0 }}"></image>
-      <image src="../assets/svgs/home.svg"      wx:else></image>
-    </view>
-    <view class="tab" @tap="switchTapTo(1)">
-      <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 1 }}"></image>
-      <image src="../assets/svgs/message.svg"      wx:else></image>
-      <view class="badge badge-number" wx:if="{{ unreadMessagesCount !== 0 }}">{{ unreadMessagesCount }}</view>
-    </view>
-    <view class="tab" @tap="switchTapTo(2)">
-      <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 2 }}"></image>
-      <image src="../assets/svgs/my.svg"      wx:else></image>
+    <view class="tabs" wx:if="{{ showTabs }}">
+      <view class="tab" @tap="switchTapTo(0)">
+        <image src="../assets/svgs/home-fill.svg" wx:if="{{ tab === 0 }}"></image>
+        <image src="../assets/svgs/home.svg"      wx:else></image>
+      </view>
+      <view class="tab" @tap="switchTapTo(1)">
+        <image src="../assets/svgs/message-fill.svg" wx:if="{{ tab === 1 }}"></image>
+        <image src="../assets/svgs/message.svg"      wx:else></image>
+        <view class="badge badge-number" wx:if="{{ unreadMessagesCount !== 0 }}">{{ unreadMessagesCount }}</view>
+      </view>
+      <view class="tab" @tap="switchTapTo(2)">
+        <image src="../assets/svgs/my-fill.svg" wx:if="{{ tab === 2 }}"></image>
+        <image src="../assets/svgs/my.svg"      wx:else></image>
+      </view>
     </view>
   </view>
 </template>
